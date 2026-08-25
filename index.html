@@ -437,7 +437,7 @@ code{background:var(--paper-2); padding:2px 7px; border-radius:6px; font-size:11
 </svg></span>
       <div>
         <h1>Assistente Financeiro</h1>
-        <div class="sub">Dashboard mensal · dados locais, nada vai a servidores</div>
+        <div class="sub">Dashboard mensal · dados do Supabase, edições ficam no navegador</div>
       </div>
     </div>
     <div class="monthbar">
@@ -1525,16 +1525,100 @@ document.getElementById('btnTheme').addEventListener('click', ()=>{
   applyTheme(next);
 });
 
+/* ======================= SUPABASE ======================= */
+/* Chave publicável: pode ficar no cliente, quem protege os dados é a RLS. */
+const SUPABASE_URL = 'https://ygknsbttphqnrwnywcak.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ow1XvQd41bBB7KcsCF-mVw_ZD6p2Ef9';
+
+async function consultarBanco(caminho){
+  const r = await fetch(SUPABASE_URL+'/rest/v1/'+caminho, {
+    headers:{ apikey:SUPABASE_KEY, Authorization:'Bearer '+SUPABASE_KEY }
+  });
+  if(!r.ok) throw new Error('HTTP '+r.status+' em '+caminho.split('?')[0]);
+  return r.json();
+}
+
+function dataBr(iso){                       // '2026-07-01' -> '01/07/2026'
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return d+'/'+m+'/'+y;
+}
+function numeroOuNulo(v){ return v==null ? null : Number(v); }
+
+/*
+  O banco guarda os dados de referência; o localStorage continua guardando o que
+  o usuário importa ou edita aqui. Cada competência é puxada uma única vez
+  (DB.sincronizados), para que uma exclusão local não reapareça no recarregamento.
+*/
+async function sincronizarComBanco(){
+  const [competencias, faturas, lancamentos] = await Promise.all([
+    consultarBanco('competencias?select=id,ano,mes,saldo_conta_anterior,saldo_conta_final&usuario_id=is.null'),
+    consultarBanco('faturas?select=competencia_id,data_fechamento,data_vencimento,saldo_anterior,pagamento,compras_periodo,total,limite_total,pagamento_minimo&usuario_id=is.null'),
+    consultarBanco('vw_lancamentos_detalhados?select=id,competencia_id,data,descricao,tipo,origem,valor,categoria&usuario_id=is.null&order=data.asc')
+  ]);
+
+  DB.sincronizados = DB.sincronizados || {};
+  let importados = 0;
+
+  for(const c of competencias){
+    const chave = c.ano+'-'+String(c.mes).padStart(2,'0');
+    if(DB.sincronizados[chave]) continue;
+    DB.sincronizados[chave] = true;
+
+    const m = ensureMonth(chave);
+    // Não sobrescreve um mês em que o usuário já tenha mexido.
+    if(m.transactions.length || m.bank.saldoAnterior!=null || m.bank.saldoFinal!=null) continue;
+
+    m.bank.saldoAnterior = numeroOuNulo(c.saldo_conta_anterior);
+    m.bank.saldoFinal    = numeroOuNulo(c.saldo_conta_final);
+
+    const f = faturas.find(f=>f.competencia_id===c.id);
+    if(f){
+      m.card.fechamento      = dataBr(f.data_fechamento);
+      m.card.vencimento      = dataBr(f.data_vencimento);
+      m.card.saldoAnterior   = numeroOuNulo(f.saldo_anterior);
+      m.card.pagamento       = numeroOuNulo(f.pagamento);
+      m.card.comprasPeriodo  = numeroOuNulo(f.compras_periodo);
+      m.card.total           = numeroOuNulo(f.total);
+      m.card.limiteTotal     = numeroOuNulo(f.limite_total);
+      m.card.pagamentoMinimo = numeroOuNulo(f.pagamento_minimo);
+    }
+
+    for(const l of lancamentos){
+      if(l.competencia_id !== c.id) continue;
+      m.transactions.push({
+        id: 'tx_'+l.id,
+        date: dataBr(l.data),
+        desc: l.descricao,
+        type: l.tipo,                       // receita | despesa | transferencia
+        source: l.origem,                   // conta | cartao
+        category: l.categoria || 'Outros',
+        value: Number(l.valor)
+      });
+      importados++;
+    }
+  }
+  return importados;
+}
+
 /* ======================= INIT ======================= */
-(function init(){
+(async function init(){
   applyTheme(localStorage.getItem(THEME_KEY) || 'auto');
   document.getElementById('mDate').valueAsDate = new Date('2026-07-15');
+
+  let importados = 0, falha = null;
+  try{ importados = await sincronizarComBanco(); }
+  catch(e){ falha = e.message; }
+
   if(!Object.keys(DB.months).length){
     ensureMonth('2026-07');
   }
   currentMonth = Object.keys(DB.months).sort()[0];
   saveDB();
   renderAll();
+
+  if(falha) showMsg('Não foi possível ler o banco ('+falha+'). Exibindo apenas os dados locais.','err');
+  else if(importados) showMsg(importados+' lançamentos carregados do banco.','ok');
 })();
 </script>
 </body>
