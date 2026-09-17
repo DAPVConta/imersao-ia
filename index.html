@@ -437,7 +437,7 @@ code{background:var(--paper-2); padding:2px 7px; border-radius:6px; font-size:11
 </svg></span>
       <div>
         <h1>Assistente Financeiro</h1>
-        <div class="sub">Dashboard mensal · dados do Supabase, edições ficam no navegador</div>
+        <div class="sub">Dashboard mensal · importações salvas no banco de dados</div>
       </div>
     </div>
     <div class="monthbar">
@@ -557,7 +557,7 @@ code{background:var(--paper-2); padding:2px 7px; border-radius:6px; font-size:11
   </div>
 </div>
 
-<div class="footer-note">Dados de exemplo fictícios, para uso didático. Os dados de referência vêm do banco; o que você importa ou edita fica salvo neste navegador. <span id="versaoApp"></span></div>
+<div class="footer-note">Dados de exemplo fictícios, para uso didático. O que você importa é salvo no banco de dados e aparece em qualquer aparelho. <span id="versaoApp"></span></div>
 </div>
 
 <script>
@@ -1522,29 +1522,41 @@ function renderStaging(containerId, rows, sourceLabel, monthPatch){
   document.getElementById('stageAll').addEventListener('change', e=>{
     container.querySelectorAll('.stageChk').forEach(c=>c.checked = e.target.checked);
   });
-  document.getElementById('btnConfirmStage').addEventListener('click', ()=>{
+  document.getElementById('btnConfirmStage').addEventListener('click', async ()=>{
     const targetMonth = selMonth.value;
     if(!targetMonth){ showMsg('Selecione ou crie um mês primeiro.','err'); return; }
+    const botao = document.getElementById('btnConfirmStage');
     const isNewMonth = !DB.months[targetMonth];
     const m = ensureMonth(targetMonth);
-    let count = 0;
+    const novos = [];
     container.querySelectorAll('.stagerow').forEach(tr=>{
       const idx = parseInt(tr.dataset.idx,10);
       if(!tr.querySelector('.stageChk').checked) return;
       const r = rows[idx];
       const type = tr.querySelector('.stageType').value;
       const category = tr.querySelector('.stageCat').value;
-      m.transactions.push({id:uid(), date:r.date, desc:r.desc, type, source:r.source, category, value:r.value});
-      count++;
+      const lanc = {id:uid(), date:r.date, desc:r.desc, type, source:r.source, category, value:r.value};
+      m.transactions.push(lanc);
+      novos.push(lanc);
     });
     if(monthPatch){
       if(monthPatch.bank) Object.assign(m.bank, monthPatch.bank);
       if(monthPatch.card) Object.assign(m.card, monthPatch.card);
     }
     currentMonth = targetMonth;
-    saveDB(); renderAll(); container.innerHTML='';
-    showMsg(count+' lançamento(s) importado(s) via '+sourceLabel+' em '+monthLabel(targetMonth)
-      + (isNewMonth ? ' — mês criado automaticamente.' : '.'), 'ok');
+    saveDB(); renderAll();
+
+    const base = novos.length+' lançamento(s) importado(s) via '+sourceLabel+' em '+monthLabel(targetMonth)
+      + (isNewMonth ? ' — mês criado' : '');
+    botao.disabled = true; botao.textContent = 'Salvando no banco...';
+    try{
+      await enviarImportacaoAoBanco(targetMonth, novos, monthPatch);
+      container.innerHTML='';
+      showMsg(base+'. Salvo no banco de dados.','ok');
+    }catch(e){
+      container.innerHTML='';
+      showMsg(base+'. Mas NÃO foi possível salvar no banco ('+e.message+') — os dados estão apenas neste navegador.','err');
+    }
   });
 }
 
@@ -1640,10 +1652,119 @@ async function sincronizarComBanco(){
   return importados;
 }
 
+/* ======================= GRAVAÇÃO NO BANCO ======================= */
+/*
+  O painel fala com a API como visitante (anon). As linhas compartilhadas
+  (usuario_id nulo) aceitam gravação, então o que é importado aqui vai para o
+  banco e reaparece em qualquer aparelho que abrir o painel.
+*/
+async function gravarNoBanco(caminho, corpo, {metodo='POST', prefer='return=representation'}={}){
+  const r = await fetch(SUPABASE_URL+'/rest/v1/'+caminho, {
+    method: metodo,
+    headers:{
+      apikey: SUPABASE_KEY,
+      Authorization: 'Bearer '+SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      Prefer: prefer
+    },
+    body: JSON.stringify(corpo)
+  });
+  if(!r.ok) throw new Error('HTTP '+r.status+' ao gravar em '+caminho.split('?')[0]+' — '+(await r.text()).slice(0,180));
+  const texto = await r.text();
+  return texto ? JSON.parse(texto) : [];
+}
+
+function dataIso(br){                        // '01/07/2026' -> '2026-07-01'
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(br||'').trim());
+  return m ? m[3]+'-'+m[2]+'-'+m[1] : null;
+}
+
+let mapaCategorias = null;                   // nome da categoria -> id no banco
+async function idsDasCategorias(){
+  if(mapaCategorias) return mapaCategorias;
+  const linhas = await consultarBanco('categorias?select=id,nome&usuario_id=is.null');
+  mapaCategorias = {};
+  for(const c of linhas) mapaCategorias[c.nome] = c.id;
+  return mapaCategorias;
+}
+
+/* Garante a competência (o mês) no banco e devolve o id. */
+async function garantirCompetencia(chave, bank){
+  const [ano, mes] = chave.split('-').map(Number);
+  const achadas = await consultarBanco('competencias?select=id&usuario_id=is.null&ano=eq.'+ano+'&mes=eq.'+mes);
+  const saldos = {
+    saldo_conta_anterior: bank && bank.saldoAnterior!=null ? bank.saldoAnterior : null,
+    saldo_conta_final:    bank && bank.saldoFinal!=null    ? bank.saldoFinal    : null
+  };
+  if(achadas.length){
+    const id = achadas[0].id;
+    if(saldos.saldo_conta_anterior!=null || saldos.saldo_conta_final!=null){
+      await gravarNoBanco('competencias?id=eq.'+id, saldos, {metodo:'PATCH', prefer:'return=minimal'});
+    }
+    return {id, criada:false};
+  }
+  const criadas = await gravarNoBanco('competencias', [{ano, mes, ...saldos}]);
+  return {id: criadas[0].id, criada:true};
+}
+
+/* Grava o resumo da fatura do cartão daquele mês. */
+async function salvarFatura(competenciaId, card){
+  const corpo = {
+    competencia_id: competenciaId,
+    data_fechamento: dataIso(card.fechamento),
+    data_vencimento: dataIso(card.vencimento),
+    saldo_anterior:  card.saldoAnterior,
+    pagamento:       card.pagamento,
+    compras_periodo: card.comprasPeriodo,
+    total:           card.total,
+    limite_total:    card.limiteTotal,
+    pagamento_minimo:card.pagamentoMinimo
+  };
+  const achadas = await consultarBanco('faturas?select=id&usuario_id=is.null&competencia_id=eq.'+competenciaId);
+  if(achadas.length){
+    await gravarNoBanco('faturas?id=eq.'+achadas[0].id, corpo, {metodo:'PATCH', prefer:'return=minimal'});
+  } else {
+    await gravarNoBanco('faturas', [corpo], {prefer:'return=minimal'});
+  }
+}
+
+/*
+  Envia os lançamentos. O índice de deduplicação do banco
+  (competencia_id, origem, data, descricao, valor) evita duplicar quando o
+  mesmo extrato é importado duas vezes.
+*/
+async function salvarLancamentos(competenciaId, lancamentos){
+  if(!lancamentos.length) return 0;
+  const cats = await idsDasCategorias();
+  const corpo = lancamentos.map(t => ({
+    competencia_id: competenciaId,
+    data: dataIso(t.date),
+    descricao: t.desc,
+    tipo: t.type,
+    origem: t.source,
+    valor: t.value,
+    categoria_id: cats[t.category] || cats['Outros'] || null
+  })).filter(l => l.data);
+  await gravarNoBanco(
+    'lancamentos?on_conflict=competencia_id,origem,data,descricao,valor',
+    corpo,
+    {prefer:'resolution=merge-duplicates,return=minimal'}
+  );
+  return corpo.length;
+}
+
+/* Sobe para o banco tudo que acabou de ser importado num mês. */
+async function enviarImportacaoAoBanco(chave, lancamentos, monthPatch){
+  const mes = DB.months[chave];
+  const {id} = await garantirCompetencia(chave, mes.bank);
+  if(monthPatch && monthPatch.card) await salvarFatura(id, mes.card);
+  return await salvarLancamentos(id, lancamentos);
+}
+
 /* ======================= INIT ======================= */
 /* Carimbo visível no rodapé: serve para conferir, sem abrir o código, se o
    navegador está mostrando a versão mais recente ou uma cópia em cache. */
-const VERSAO_APP = 'v17/09/2026';
+const VERSAO_APP = 'v17/09/2026-b';
 
 (async function init(){
   applyTheme(localStorage.getItem(THEME_KEY) || 'auto');
