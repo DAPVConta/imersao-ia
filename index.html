@@ -1449,11 +1449,41 @@ async function handlePdfFile(file){
   }
 }
 
+/* Descobre em que mês o documento cai, pelas datas dos próprios lançamentos. */
+function monthKeyFromDate(d){
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(d||'').trim());
+  return m ? m[3]+'-'+m[2] : null;
+}
+function detectMonthKey(rows){
+  const tally = {};
+  for(const r of rows){
+    const k = monthKeyFromDate(r.date);
+    if(k) tally[k] = (tally[k]||0)+1;
+  }
+  const keys = Object.keys(tally);
+  if(!keys.length) return null;
+  // mês predominante; empate resolve pelo mais antigo
+  return keys.sort((a,b)=> tally[b]-tally[a] || (a<b?-1:1))[0];
+}
+
 function renderStaging(containerId, rows, sourceLabel, monthPatch){
   const container = document.getElementById(containerId);
   if(!rows.length){ container.innerHTML = '<p class="small">Nenhum lançamento reconhecido.</p>'; return; }
   const catOpts = CATEGORIES.map(c=>`<option value="${c.id}">${c.id}</option>`).join('');
+
+  const detected = detectMonthKey(rows);
+  const target = detected || currentMonth;
+  const spanKeys = [...new Set(rows.map(r=>monthKeyFromDate(r.date)).filter(Boolean))].sort();
+  const monthOpts = [...new Set([...Object.keys(DB.months), target].filter(Boolean))].sort()
+    .map(k=>`<option value="${k}"${k===target?' selected':''}>${monthLabel(k)}${DB.months[k]?'':' — novo'}</option>`).join('');
+
   container.innerHTML = `
+    <div class="flexrow" style="margin:14px 0 6px;">
+      <label class="small" for="stageMonth"><strong>Importar no mês:</strong></label>
+      <select id="stageMonth">${monthOpts}</select>
+      <span class="pill" id="stageNewHint" style="display:none;">✨ mês novo — será criado</span>
+    </div>
+    ${spanKeys.length>1 ? `<p class="small">Os lançamentos vão de ${monthLabel(spanKeys[0])} a ${monthLabel(spanKeys[spanKeys.length-1])} — todos entram no mês escolhido acima.</p>` : ''}
     <div class="tablewrap" style="margin-top:10px;">
       <table>
         <thead><tr><th><input type="checkbox" id="stageAll" checked></th><th>Data</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th class="num">Valor</th></tr></thead>
@@ -1481,6 +1511,11 @@ function renderStaging(containerId, rows, sourceLabel, monthPatch){
       <span class="small">Os itens desmarcados não serão importados.</span>
     </div>
   `;
+  const selMonth = document.getElementById('stageMonth');
+  const newHint = document.getElementById('stageNewHint');
+  const refreshHint = ()=>{ newHint.style.display = DB.months[selMonth.value] ? 'none' : ''; };
+  selMonth.addEventListener('change', refreshHint);
+  refreshHint();
   container.querySelectorAll('.stagerow').forEach((tr,idx)=>{
     tr.querySelector('.stageCat').value = rows[idx].category;
   });
@@ -1488,8 +1523,10 @@ function renderStaging(containerId, rows, sourceLabel, monthPatch){
     container.querySelectorAll('.stageChk').forEach(c=>c.checked = e.target.checked);
   });
   document.getElementById('btnConfirmStage').addEventListener('click', ()=>{
-    if(!currentMonth){ showMsg('Selecione ou crie um mês primeiro.','err'); return; }
-    const m = ensureMonth(currentMonth);
+    const targetMonth = selMonth.value;
+    if(!targetMonth){ showMsg('Selecione ou crie um mês primeiro.','err'); return; }
+    const isNewMonth = !DB.months[targetMonth];
+    const m = ensureMonth(targetMonth);
     let count = 0;
     container.querySelectorAll('.stagerow').forEach(tr=>{
       const idx = parseInt(tr.dataset.idx,10);
@@ -1504,8 +1541,10 @@ function renderStaging(containerId, rows, sourceLabel, monthPatch){
       if(monthPatch.bank) Object.assign(m.bank, monthPatch.bank);
       if(monthPatch.card) Object.assign(m.card, monthPatch.card);
     }
+    currentMonth = targetMonth;
     saveDB(); renderAll(); container.innerHTML='';
-    showMsg(count+' lançamento(s) importado(s) via '+sourceLabel+'.','ok');
+    showMsg(count+' lançamento(s) importado(s) via '+sourceLabel+' em '+monthLabel(targetMonth)
+      + (isNewMonth ? ' — mês criado automaticamente.' : '.'), 'ok');
   });
 }
 
