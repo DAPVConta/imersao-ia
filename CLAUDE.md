@@ -48,9 +48,19 @@ junto com a consequência (os dados são graváveis por qualquer um que tenha o
 endereço) e o caminho de volta (autenticar, mesmo que anonimamente, e voltar às
 políticas por dono). Não reverter isso sem ele pedir.
 
-Só `competencias`, `faturas` e `lancamentos` estão abertas para escrita.
-`categorias`, `contas`, `cartoes`, `regras_categorizacao` e `perfis` seguem
-somente-leitura para o visitante.
+Só `competencias`, `faturas`, `lancamentos` e `agendamentos` estão abertas para
+escrita. `categorias`, `contas`, `cartoes`, `regras_categorizacao` e `perfis`
+seguem somente-leitura para o visitante.
+
+## Agenda
+
+`agendamentos` guarda o que ainda não aconteceu. Um lançamento manual com data
+futura vai para lá em vez de entrar nos totais do mês — previsão não é fato, e
+somar as duas coisas faria o saldo mostrar dinheiro que não saiu nem entrou.
+Quando o dono clica em "Aconteceu", o agendamento vira um lançamento no mês da
+data prevista e guarda o vínculo (`lancamento_id`, `situacao = 'realizado'`),
+para não ser confirmado duas vezes. A visão `vw_agenda_detalhada` já traz a
+categoria resolvida, como `vw_lancamentos_detalhados` faz com os lançamentos.
 
 ## Como testar
 

@@ -397,6 +397,52 @@ tr.rule-total td{border-top:2px solid var(--rule-strong); font-weight:800; backg
 .gm-atual{fill:var(--ink);}
 .gm-col rect{transition:opacity .15s ease;}
 .gm-col:hover rect{opacity:1;}
+/* ---- agenda: o que ainda vai acontecer ---- */
+.ag-resumo{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;}
+.ag-chip{
+  display:flex; flex-direction:column; gap:3px; background:var(--sheet-2);
+  border:1px solid var(--border); border-radius:12px; padding:9px 15px; min-width:150px;
+}
+.ag-chip .c-label{font-size:9.5px; text-transform:uppercase; letter-spacing:.12em; font-weight:800; color:var(--ink-mute);}
+.ag-chip .c-value{font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+.ag-chip .c-value.bad{color:var(--debit-deep);}
+.ag-chip .c-value.good{color:var(--credit-deep);}
+.ag-chip .c-foot{font-size:10.5px; color:var(--ink-mute);}
+.ag-mes{
+  font-size:10px; text-transform:uppercase; letter-spacing:.12em; font-weight:800;
+  color:var(--ink-mute); margin:16px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--rule);
+}
+.ag-mes:first-child{margin-top:0;}
+.ag-item{
+  display:grid; grid-template-columns:58px 1fr auto auto; gap:13px; align-items:center;
+  grid-template-areas:"dia desc valor acoes";
+  padding:10px 14px; border:1px solid var(--border); border-radius:12px;
+  background:var(--sheet); margin-bottom:7px;
+  transition:border-color .15s ease, transform .15s ease;
+}
+.ag-item:hover{border-color:var(--navy-3); transform:translateY(-1px);}
+.ag-item.atrasado{border-color:var(--debit); background:rgba(214,59,86,.055);}
+.ag-dia{grid-area:dia; text-align:center; line-height:1.15;}
+.ag-dia .d-num{font-size:18px; font-weight:800; font-variant-numeric:tabular-nums;}
+.ag-dia .d-mes{font-size:9.5px; text-transform:uppercase; letter-spacing:.08em; font-weight:800; color:var(--ink-mute);}
+.ag-desc{grid-area:desc; min-width:0;}
+.ag-desc .d-titulo{font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.ag-desc .d-meta{display:flex; gap:11px; align-items:center; flex-wrap:wrap; margin-top:3px;}
+.ag-prazo{font-size:10.5px; font-weight:700; color:var(--ink-mute);}
+.ag-prazo.perto{color:var(--gold-deep);}
+.ag-prazo.venceu{color:var(--debit-deep);}
+.ag-valor{grid-area:valor; font-variant-numeric:tabular-nums; font-weight:800; font-size:14px; white-space:nowrap; text-align:right;}
+.ag-valor.despesa{color:var(--debit-deep);}
+.ag-valor.receita{color:var(--credit-deep);}
+.ag-valor.transferencia{color:var(--ink-mute);}
+.ag-acoes{grid-area:acoes; display:flex; gap:6px;}
+.ag-vazio{color:var(--ink-mute); font-size:12.5px; padding:20px 0; text-align:center;}
+@media(max-width:700px){
+  .ag-item{grid-template-columns:52px 1fr; grid-template-areas:"dia desc" "valor acoes"; row-gap:9px;}
+  .ag-valor{text-align:left;}
+  .ag-acoes{justify-content:flex-end;}
+}
+
 .footer-note{text-align:center; color:var(--ink-mute); font-size:11px; margin-top:30px;}
 .icon-btn{padding:4px 9px; font-size:12px; border-radius:8px;}
 .cat-select{font-size:12px;}
@@ -552,6 +598,20 @@ code{background:var(--paper-2); padding:2px 7px; border-radius:6px; font-size:11
   </div>
 </div>
 
+<div class="card" id="cardAgenda">
+  <h2>Agenda <span class="hint">o que ainda não aconteceu: todo lançamento com data futura entra aqui</span></h2>
+  <div class="ag-resumo" id="agResumo"></div>
+  <div class="toolbar">
+    <select id="agFiltro">
+      <option value="30">Próximos 30 dias</option>
+      <option value="todos">Tudo que está previsto</option>
+      <option value="mes">Só do mês selecionado</option>
+    </select>
+    <span class="right small" id="agCount"></span>
+  </div>
+  <div id="agendaList"></div>
+</div>
+
 <div class="card">
   <h2>Lançamentos do mês</h2>
   <div class="toolbar">
@@ -698,9 +758,13 @@ let currentMonth = null;
 function loadDB(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const salvo = JSON.parse(raw);
+      if(!Array.isArray(salvo.agenda)) salvo.agenda = [];   // backups anteriores à agenda
+      return salvo;
+    }
   }catch(e){}
-  return { months:{}, rules: JSON.parse(JSON.stringify(DEFAULT_RULES)) };
+  return { months:{}, rules: JSON.parse(JSON.stringify(DEFAULT_RULES)), agenda: [] };
 }
 function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(DB)); }
 
@@ -725,6 +789,33 @@ function fmtBRL(v){
   return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 function uid(){ return 'tx_'+Math.random().toString(36).slice(2,10); }
+function uidAgenda(){ return 'ag_'+Math.random().toString(36).slice(2,10); }
+
+/* Texto vindo do banco é gravável por qualquer visitante: escapar antes de
+   jogar no HTML, para que uma descrição nunca vire marcação. */
+function esc(v){
+  return String(v==null?'':v).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* Hoje no fuso do navegador, em AAAA-MM-DD — mesmo formato do <input type=date>. */
+function hojeIso(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function ehDataFutura(iso){ return !!iso && iso > hojeIso(); }
+/* Dias inteiros entre hoje e a data (negativo = já passou). */
+function diasAte(iso){
+  if(!iso) return 0;
+  const [y,m,d] = iso.split('-').map(Number);
+  const hoje = new Date();
+  return Math.round((Date.UTC(y,m-1,d) - Date.UTC(hoje.getFullYear(),hoje.getMonth(),hoje.getDate())) / 86400000);
+}
+function chaveDoMes(iso){ return iso ? iso.slice(0,7) : null; }   // '2026-11-05' -> '2026-11'
+function mesAbrev(iso){
+  const nomes=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  return nomes[parseInt(iso.slice(5,7),10)-1];
+}
 
 function showMsg(text, kind){
   const el = document.getElementById('msgArea');
@@ -1150,6 +1241,176 @@ function renderTxTable(){
   });
 }
 
+/* ======================= AGENDA ======================= */
+/*
+  A agenda guarda o que ainda vai acontecer. Um lançamento com data futura não
+  é fato: não pode entrar nos totais do mês, senão o saldo mostra dinheiro que
+  ainda não saiu nem entrou. Ele espera aqui e, quando o dono confirma que
+  aconteceu, vira lançamento de verdade — no mês da data, aqui e no banco.
+*/
+function ensureAgenda(){
+  if(!Array.isArray(DB.agenda)) DB.agenda = [];
+  return DB.agenda;
+}
+function agendaOrdenada(){
+  return ensureAgenda().slice().sort((a,b)=>{
+    const ia = dataIso(a.date)||'', ib = dataIso(b.date)||'';
+    return ia < ib ? -1 : ia > ib ? 1 : 0;
+  });
+}
+function textoPrazo(dias){
+  if(dias < -1) return {txt:'passou há '+Math.abs(dias)+' dias', cls:'venceu'};
+  if(dias === -1) return {txt:'era ontem', cls:'venceu'};
+  if(dias === 0)  return {txt:'é hoje', cls:'perto'};
+  if(dias === 1)  return {txt:'é amanhã', cls:'perto'};
+  if(dias <= 7)   return {txt:'em '+dias+' dias', cls:'perto'};
+  return {txt:'em '+dias+' dias', cls:''};
+}
+
+function renderAgenda(){
+  const lista  = document.getElementById('agendaList');
+  const resumo = document.getElementById('agResumo');
+  const filtro = document.getElementById('agFiltro').value;
+  const itens  = agendaOrdenada();
+
+  /* Resumo: sempre sobre TUDO que está previsto, não sobre o filtro da lista. */
+  let aPagar30=0, aReceber30=0, atrasados=0, valorAtrasado=0, previstoMes=0;
+  for(const a of itens){
+    const iso = dataIso(a.date); if(!iso) continue;
+    const dias = diasAte(iso);
+    if(dias < 0){ atrasados++; valorAtrasado += a.value; }
+    if(dias <= 30){
+      if(a.type==='despesa') aPagar30 += a.value;
+      else if(a.type==='receita') aReceber30 += a.value;
+    }
+    if(chaveDoMes(iso) === currentMonth){
+      if(a.type==='despesa') previstoMes -= a.value;
+      else if(a.type==='receita') previstoMes += a.value;
+    }
+  }
+  const saldoHoje = currentMonth ? computeTotals(currentMonth).saldo : 0;
+  const saldoPrevisto = saldoHoje + previstoMes;
+  resumo.innerHTML = `
+    <div class="ag-chip"><div class="c-label">A pagar</div>
+      <div class="c-value bad">${fmtBRL(aPagar30)}</div><div class="c-foot">nos próximos 30 dias</div></div>
+    <div class="ag-chip"><div class="c-label">A receber</div>
+      <div class="c-value good">${fmtBRL(aReceber30)}</div><div class="c-foot">nos próximos 30 dias</div></div>
+    <div class="ag-chip"><div class="c-label">Passou da data</div>
+      <div class="c-value ${atrasados?'bad':''}">${atrasados}</div>
+      <div class="c-foot">${atrasados? fmtBRL(valorAtrasado)+' esperando confirmação' : 'nada atrasado'}</div></div>
+    <div class="ag-chip"><div class="c-label">Resultado previsto</div>
+      <div class="c-value ${saldoPrevisto<0?'bad':'good'}">${fmtBRL(saldoPrevisto)}</div>
+      <div class="c-foot">${currentMonth? monthLabel(currentMonth)+', já contando a agenda' : '—'}</div></div>`;
+
+  const visiveis = itens.filter(a=>{
+    const iso = dataIso(a.date); if(!iso) return false;
+    if(filtro==='30')  return diasAte(iso) <= 30;
+    if(filtro==='mes') return chaveDoMes(iso) === currentMonth;
+    return true;
+  });
+  document.getElementById('agCount').textContent =
+    visiveis.length + ' de ' + itens.length + ' previsto(s)';
+
+  if(!visiveis.length){
+    lista.innerHTML = `<div class="ag-vazio">${itens.length
+      ? 'Nada previsto nesse recorte — troque o filtro acima para ver o resto.'
+      : 'Nada agendado. Lance algo com data futura em “Lançamento manual” e ele aparece aqui.'}</div>`;
+    return;
+  }
+
+  let html = '', mesAtual = null;
+  for(const a of visiveis){
+    const iso = dataIso(a.date);
+    const chave = chaveDoMes(iso);
+    if(chave !== mesAtual){ mesAtual = chave; html += `<div class="ag-mes">${monthLabel(chave)}</div>`; }
+    const dias = diasAte(iso);
+    const prazo = textoPrazo(dias);
+    const sinal = a.type==='receita' ? '+' : (a.type==='despesa' ? '-' : '');
+    html += `<div class="ag-item ${dias<0?'atrasado':''}" data-id="${esc(a.id)}">
+      <div class="ag-dia"><div class="d-num">${iso.slice(8,10)}</div><div class="d-mes">${mesAbrev(iso)}</div></div>
+      <div class="ag-desc">
+        <div class="d-titulo" title="${esc(a.desc)}">${esc(a.desc)}</div>
+        <div class="d-meta">
+          <span class="tag" style="--tag-color:${catColor(a.category)}">${esc(a.category)}</span>
+          <span class="small">${a.source==='cartao'?'Cartão':'Conta'}</span>
+          <span class="ag-prazo ${prazo.cls}">${prazo.txt}</span>
+        </div>
+      </div>
+      <div class="ag-valor ${esc(a.type)}">${sinal}${fmtBRL(a.value)}</div>
+      <div class="ag-acoes">
+        <button class="icon-btn btnAgOk" data-id="${esc(a.id)}" title="Já aconteceu: vira lançamento do mês">✓ Aconteceu</button>
+        <button class="icon-btn ghost btnAgDel" data-id="${esc(a.id)}" title="Remover da agenda">✕</button>
+      </div>
+    </div>`;
+  }
+  lista.innerHTML = html;
+
+  lista.querySelectorAll('.btnAgOk').forEach(b=>{
+    b.onclick = ()=> confirmarAgendamento(b.dataset.id, b);
+  });
+  lista.querySelectorAll('.btnAgDel').forEach(b=>{
+    b.onclick = ()=> removerAgendamento(b.dataset.id, b);
+  });
+}
+
+/* Agendar: guarda aqui na hora (para a tela responder na hora) e sobe ao banco. */
+async function agendarLancamento(item){
+  ensureAgenda().push(item);
+  saveDB(); renderAll();
+  try{
+    item.dbId = await salvarAgendamentoNoBanco(item);
+    saveDB();
+  }catch(e){
+    showMsg('Agendado neste navegador, mas não deu para gravar no banco ('+e.message+'). Ele não vai aparecer nos outros aparelhos.','err');
+  }
+}
+
+/* Confirmar: sai da agenda e entra como lançamento no mês da data prevista. */
+async function confirmarAgendamento(id, botao){
+  const item = ensureAgenda().find(a=>a.id===id);
+  if(!item) return;
+  const iso = dataIso(item.date);
+  const chave = chaveDoMes(iso);
+  if(botao){ botao.disabled = true; botao.textContent = 'Confirmando...'; }
+
+  const mes = ensureMonth(chave);
+  const jaExiste = mes.transactions.some(t =>
+    t.date===item.date && t.desc===item.desc && t.value===item.value && t.source===item.source);
+  if(!jaExiste){
+    mes.transactions.push({id:uid(), date:item.date, desc:item.desc, type:item.type,
+                           source:item.source, category:item.category, value:item.value});
+  }
+  DB.agenda = ensureAgenda().filter(a=>a.id!==id);
+  saveDB(); renderAll();
+  showMsg('“'+esc(item.desc)+'” virou lançamento de '+monthLabel(chave)+'.','ok');
+
+  try{
+    const {id:competenciaId} = await garantirCompetencia(chave, mes.bank);
+    const lancamento = await salvarUmLancamento(competenciaId, item);
+    if(item.dbId){
+      await gravarNoBanco('agendamentos?id=eq.'+item.dbId, {
+        situacao:'realizado',
+        lancamento_id: lancamento ? lancamento.id : null,
+        competencia_id: competenciaId
+      }, {metodo:'PATCH', prefer:'return=minimal'});
+    }
+  }catch(e){
+    showMsg('Confirmado aqui, mas o banco não recebeu ('+e.message+'). Tente de novo mais tarde.','err');
+  }
+}
+
+async function removerAgendamento(id, botao){
+  const item = ensureAgenda().find(a=>a.id===id);
+  if(!item) return;
+  if(!confirm('Tirar “'+item.desc+'” da agenda?')) return;
+  if(botao) botao.disabled = true;
+  DB.agenda = ensureAgenda().filter(a=>a.id!==id);
+  saveDB(); renderAll();
+  if(!item.dbId) return;
+  try{ await gravarNoBanco('agendamentos?id=eq.'+item.dbId, {}, {metodo:'DELETE', prefer:'return=minimal'}); }
+  catch(e){ showMsg('Removido daqui, mas continua no banco ('+e.message+').','err'); }
+}
+
 /* ======================= RENDER: rules ======================= */
 function renderRules(){
   const body = document.getElementById('rulesBody');
@@ -1192,6 +1453,7 @@ function renderAll(){
   renderCardSummary();
   renderTrend();
   renderGastosMensais();
+  renderAgenda();
   renderTxTable();
   renderRules();
 }
@@ -1242,10 +1504,15 @@ document.querySelectorAll('.tabbtn').forEach(b=>{
   document.getElementById(id).addEventListener('input', renderTxTable);
   document.getElementById(id).addEventListener('change', renderTxTable);
 });
+document.getElementById('agFiltro').addEventListener('change', renderAgenda);
 
 /* ======================= EVENTS: manual add ======================= */
-document.getElementById('btnAddManual').addEventListener('click', ()=>{
-  if(!currentMonth){ showMsg('Selecione ou crie um mês primeiro.','err'); return; }
+/*
+  A data decide o destino: se ainda não chegou, o lançamento vai para a AGENDA
+  (previsto, fora dos totais); se já passou ou é hoje, entra como lançamento no
+  mês daquela data — não no mês que estiver aberto na tela, que pode ser outro.
+*/
+document.getElementById('btnAddManual').addEventListener('click', async ()=>{
   const date = document.getElementById('mDate').value;
   const desc = document.getElementById('mDesc').value.trim();
   const type = document.getElementById('mType').value;
@@ -1254,11 +1521,31 @@ document.getElementById('btnAddManual').addEventListener('click', ()=>{
   const value = parseFloat(document.getElementById('mValue').value);
   if(!date || !desc || isNaN(value) || value<=0){ showMsg('Preencha data, descrição e um valor válido.','err'); return; }
   const [y,m,d] = date.split('-');
-  const m2 = ensureMonth(currentMonth);
-  m2.transactions.push({id:uid(), date:`${d}/${m}/${y}`, desc, type, source, category, value});
-  saveDB(); renderAll();
-  document.getElementById('mDesc').value=''; document.getElementById('mValue').value='';
-  showMsg('Lançamento adicionado.','ok');
+  const dataBrFmt = `${d}/${m}/${y}`;
+  const limpar = ()=>{ document.getElementById('mDesc').value=''; document.getElementById('mValue').value=''; };
+
+  if(ehDataFutura(date)){
+    limpar();
+    const dias = diasAte(date);
+    showMsg('Data ainda não chegou: “'+esc(desc)+'” foi para a <strong>agenda</strong> ('+dataBrFmt+
+            ', '+textoPrazo(dias).txt+'). Não entra nos totais do mês até você confirmar que aconteceu.','ok');
+    await agendarLancamento({id:uidAgenda(), dbId:null, date:dataBrFmt, desc, type, source, category, value});
+    return;
+  }
+
+  const chave = `${y}-${m}`;
+  const mes = ensureMonth(chave);
+  mes.transactions.push({id:uid(), date:dataBrFmt, desc, type, source, category, value});
+  currentMonth = chave;
+  saveDB(); renderAll(); limpar();
+  showMsg('Lançamento adicionado em '+monthLabel(chave)+'.','ok');
+
+  try{
+    const {id:competenciaId} = await garantirCompetencia(chave, mes.bank);
+    await salvarUmLancamento(competenciaId, {date:dataBrFmt, desc, type, source, category, value});
+  }catch(e){
+    showMsg('Lançado neste navegador, mas o banco não recebeu ('+e.message+'). Ele não vai aparecer nos outros aparelhos.','err');
+  }
 });
 
 /* ======================= EVENTS: demo data ======================= */
@@ -1741,7 +2028,7 @@ async function gravarNoBanco(caminho, corpo, {metodo='POST', prefer='return=repr
       'Content-Type': 'application/json',
       Prefer: prefer
     },
-    body: JSON.stringify(corpo)
+    body: metodo==='DELETE' ? undefined : JSON.stringify(corpo)
   });
   if(!r.ok) throw new Error('HTTP '+r.status+' ao gravar em '+caminho.split('?')[0]+' — '+(await r.text()).slice(0,180));
   const texto = await r.text();
@@ -1827,6 +2114,67 @@ async function salvarLancamentos(competenciaId, lancamentos){
   return corpo.length;
 }
 
+/* Grava um lançamento só e devolve a linha criada (preciso do id para
+   amarrar o agendamento que virou este lançamento). */
+async function salvarUmLancamento(competenciaId, t){
+  const cats = await idsDasCategorias();
+  const linhas = await gravarNoBanco(
+    'lancamentos?on_conflict=competencia_id,origem,data,descricao,valor',
+    [{
+      competencia_id: competenciaId,
+      data: dataIso(t.date),
+      descricao: t.desc,
+      tipo: t.type,
+      origem: t.source,
+      valor: t.value,
+      categoria_id: cats[t.category] || cats['Outros'] || null
+    }],
+    {prefer:'resolution=merge-duplicates,return=representation'}
+  );
+  return linhas[0] || null;
+}
+
+/* ---------- agenda ---------- */
+/* Grava uma previsão. O índice de deduplicação do banco impede que o mesmo
+   agendamento entre duas vezes se o botão for clicado em dobro. */
+async function salvarAgendamentoNoBanco(item){
+  const cats = await idsDasCategorias();
+  const linhas = await gravarNoBanco(
+    'agendamentos?on_conflict=usuario_id,origem,data_prevista,descricao,valor',
+    [{
+      data_prevista: dataIso(item.date),
+      descricao: item.desc,
+      tipo: item.type,
+      origem: item.source,
+      valor: item.value,
+      categoria_id: cats[item.category] || cats['Outros'] || null
+    }],
+    {prefer:'resolution=merge-duplicates,return=representation'}
+  );
+  return linhas[0] ? linhas[0].id : null;
+}
+
+/* Puxa a agenda do banco. Diferente dos meses, aqui o banco manda: a agenda é
+   pequena e só faz sentido se estiver igual em todos os aparelhos. O que ainda
+   não subiu (dbId nulo, por falha de rede) é preservado. */
+async function sincronizarAgenda(){
+  const linhas = await consultarBanco(
+    'vw_agenda_detalhada?select=id,data_prevista,descricao,tipo,origem,valor,categoria'+
+    '&usuario_id=is.null&situacao=eq.pendente&order=data_prevista.asc');
+  const naoEnviados = ensureAgenda().filter(a=>!a.dbId);
+  DB.agenda = linhas.map(l=>({
+    id: 'ag_'+l.id,
+    dbId: l.id,
+    date: dataBr(l.data_prevista),
+    desc: l.descricao,
+    type: l.tipo,
+    source: l.origem,
+    category: l.categoria || 'Outros',
+    value: Number(l.valor)
+  })).concat(naoEnviados);
+  return DB.agenda.length;
+}
+
 /* Sobe para o banco tudo que acabou de ser importado num mês. */
 async function enviarImportacaoAoBanco(chave, lancamentos, monthPatch){
   const mes = DB.months[chave];
@@ -1838,16 +2186,21 @@ async function enviarImportacaoAoBanco(chave, lancamentos, monthPatch){
 /* ======================= INIT ======================= */
 /* Carimbo visível no rodapé: serve para conferir, sem abrir o código, se o
    navegador está mostrando a versão mais recente ou uma cópia em cache. */
-const VERSAO_APP = 'v17/09/2026-c';
+const VERSAO_APP = 'v17/09/2026-d';
 
 (async function init(){
   applyTheme(localStorage.getItem(THEME_KEY) || 'auto');
-  document.getElementById('mDate').valueAsDate = new Date('2026-07-15');
+  // Começa em hoje: é a partir dela que o painel decide entre lançamento e agenda.
+  document.getElementById('mDate').value = hojeIso();
   document.getElementById('versaoApp').textContent = '· ' + VERSAO_APP;
 
   let importados = 0, falha = null;
   try{ importados = await sincronizarComBanco(); }
   catch(e){ falha = e.message; }
+
+  let agendados = 0, falhaAgenda = null;
+  try{ agendados = await sincronizarAgenda(); }
+  catch(e){ falhaAgenda = e.message; }
 
   if(!Object.keys(DB.months).length){
     ensureMonth('2026-07');
@@ -1858,8 +2211,15 @@ const VERSAO_APP = 'v17/09/2026-c';
   saveDB();
   renderAll();
 
-  if(falha) showMsg('Não foi possível ler o banco ('+falha+'). Exibindo apenas os dados locais.','err');
-  else if(importados) showMsg(importados+' lançamentos carregados do banco.','ok');
+  const avisos = [];
+  if(falha) avisos.push('não foi possível ler os lançamentos do banco ('+falha+')');
+  if(falhaAgenda) avisos.push('não foi possível ler a agenda ('+falhaAgenda+')');
+  if(avisos.length){ showMsg(avisos.join('; ')+'. Exibindo apenas os dados deste navegador.','err'); return; }
+
+  const carregados = [];
+  if(importados) carregados.push(importados+' lançamentos');
+  if(agendados)  carregados.push(agendados+' itens na agenda');
+  if(carregados.length) showMsg(carregados.join(' e ')+' carregados do banco.','ok');
 })();
 </script>
 </body>
