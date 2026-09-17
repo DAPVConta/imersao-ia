@@ -557,7 +557,7 @@ code{background:var(--paper-2); padding:2px 7px; border-radius:6px; font-size:11
   </div>
 </div>
 
-<div class="footer-note">Documento e dados de exemplo fictícios, para uso didático. Assistente financeiro pessoal — versão local, sem envio de dados a terceiros.</div>
+<div class="footer-note">Dados de exemplo fictícios, para uso didático. Os dados de referência vêm do banco; o que você importa ou edita fica salvo neste navegador. <span id="versaoApp"></span></div>
 </div>
 
 <script>
@@ -1641,9 +1641,14 @@ async function sincronizarComBanco(){
 }
 
 /* ======================= INIT ======================= */
+/* Carimbo visível no rodapé: serve para conferir, sem abrir o código, se o
+   navegador está mostrando a versão mais recente ou uma cópia em cache. */
+const VERSAO_APP = 'v17/09/2026';
+
 (async function init(){
   applyTheme(localStorage.getItem(THEME_KEY) || 'auto');
   document.getElementById('mDate').valueAsDate = new Date('2026-07-15');
+  document.getElementById('versaoApp').textContent = '· ' + VERSAO_APP;
 
   let importados = 0, falha = null;
   try{ importados = await sincronizarComBanco(); }
@@ -1652,7 +1657,9 @@ async function sincronizarComBanco(){
   if(!Object.keys(DB.months).length){
     ensureMonth('2026-07');
   }
-  currentMonth = Object.keys(DB.months).sort()[0];
+  // Abre no mês mais recente: é onde está o que foi importado por último.
+  const meses = Object.keys(DB.months).sort();
+  currentMonth = meses[meses.length-1];
   saveDB();
   renderAll();
 
