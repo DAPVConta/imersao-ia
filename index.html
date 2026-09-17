@@ -390,6 +390,13 @@ tr.rule-total td{border-top:2px solid var(--rule-strong); font-weight:800; backg
 .trend-legend{display:flex; gap:16px; margin-bottom:4px;}
 .tl-chip{display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; color:var(--ink-2);}
 .tl-dot{width:9px; height:9px; border-radius:3px; box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.gm-valor{fill:var(--ink-2); font-size:11px; font-weight:700; font-variant-numeric:tabular-nums;
+  paint-order:stroke; stroke:var(--sheet); stroke-width:3.5px; stroke-linejoin:round;}
+.gm-mes{fill:var(--ink-mute); font-size:10.5px; font-weight:600;}
+.gm-media{fill:var(--ink-mute); font-size:9.5px; font-weight:700; letter-spacing:.04em;}
+.gm-atual{fill:var(--ink);}
+.gm-col rect{transition:opacity .15s ease;}
+.gm-col:hover rect{opacity:1;}
 .footer-note{text-align:center; color:var(--ink-mute); font-size:11px; margin-top:30px;}
 .icon-btn{padding:4px 9px; font-size:12px; border-radius:8px;}
 .cat-select{font-size:12px;}
@@ -472,6 +479,11 @@ code{background:var(--paper-2); padding:2px 7px; border-radius:6px; font-size:11
 <div class="card">
   <h2>Evolução mensal <span class="hint">receitas vs despesas</span></h2>
   <div class="trend" id="trendChart"></div>
+</div>
+
+<div class="card">
+  <h2>Total de gastos por mês <span class="hint">só despesas, exclui transferências</span></h2>
+  <div class="trend" id="gastosMensais"></div>
 </div>
 
 <div class="card">
@@ -983,6 +995,67 @@ function smoothPath(pts){
   return p;
 }
 
+/* Valor curto para caber como rótulo em cima da barra. */
+function fmtCompacto(v){
+  const n = Number(v||0);
+  if(n >= 1000) return 'R$ ' + (n/1000).toFixed(1).replace('.',',') + ' mil';
+  return 'R$ ' + n.toFixed(0);
+}
+
+/* Barras com o total de despesas de cada mês, com linha de média. */
+function renderGastosMensais(){
+  const el = document.getElementById('gastosMensais');
+  const keys = Object.keys(DB.months).sort();
+  const data = keys.map(k=>({k, total: computeTotals(k).despesas}));
+  if(!data.length || !data.some(d=>d.total>0)){
+    el.innerHTML = '<p class="small">Ainda não há despesas lançadas para comparar.</p>';
+    return;
+  }
+  const W=760, H=230, padX=30, top=38, base=H-34;
+  const max = Math.max(1, ...data.map(d=>d.total));
+  const media = data.reduce((s,d)=>s+d.total,0) / data.length;
+  const faixa = (W - padX*2) / data.length;
+  const larg = Math.min(58, faixa*0.55);
+  const alturaDe = v => Math.max((v/max)*(base-top), v>0 ? 3 : 0);
+
+  const barras = data.map((d,i)=>{
+    const x = padX + faixa*i + faixa/2;
+    const h = alturaDe(d.total);
+    const y = base - h;
+    const atual = d.k === currentMonth;
+    return `
+      <g class="gm-col">
+        <rect x="${(x-larg/2).toFixed(1)}" y="${y.toFixed(1)}" width="${larg.toFixed(1)}" height="${h.toFixed(1)}"
+              rx="7" fill="url(#gmGrad)" opacity="${atual?1:0.55}">
+          <title>${monthLabel(d.k)}: ${fmtBRL(d.total)}</title>
+        </rect>
+        <text x="${x.toFixed(1)}" y="${(y-9).toFixed(1)}" text-anchor="middle"
+              class="gm-valor${atual?' gm-atual':''}">${fmtCompacto(d.total)}</text>
+        <text x="${x.toFixed(1)}" y="${H-12}" text-anchor="middle"
+              class="gm-mes${atual?' gm-atual':''}">${monthLabel(d.k)}</text>
+      </g>`;
+  }).join('');
+
+  const yMedia = base - alturaDe(media);
+  const linhaMedia = data.length>1 ? `
+    <line x1="${padX-6}" y1="${yMedia.toFixed(1)}" x2="${W-padX+6}" y2="${yMedia.toFixed(1)}"
+          stroke="var(--ink-mute)" stroke-width="1.5" stroke-dasharray="5 5" opacity=".75"/>
+    <text x="${padX-4}" y="${(yMedia-7).toFixed(1)}" text-anchor="start" class="gm-media">média ${fmtCompacto(media)}</text>` : '';
+
+  el.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="trendsvg" role="img" aria-label="total de gastos por mês">
+      <defs>
+        <linearGradient id="gmGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--debit)"/>
+          <stop offset="100%" stop-color="var(--debit-deep)"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padX-6}" y1="${base}" x2="${W-padX+6}" y2="${base}" stroke="var(--rule-strong)" stroke-width="1"/>
+      ${linhaMedia}
+      ${barras}
+    </svg>`;
+}
+
 function renderTrend(){
   const el = document.getElementById('trendChart');
   const keys = Object.keys(DB.months).sort();
@@ -1118,6 +1191,7 @@ function renderAll(){
   renderCatBars();
   renderCardSummary();
   renderTrend();
+  renderGastosMensais();
   renderTxTable();
   renderRules();
 }
@@ -1764,7 +1838,7 @@ async function enviarImportacaoAoBanco(chave, lancamentos, monthPatch){
 /* ======================= INIT ======================= */
 /* Carimbo visível no rodapé: serve para conferir, sem abrir o código, se o
    navegador está mostrando a versão mais recente ou uma cópia em cache. */
-const VERSAO_APP = 'v17/09/2026-b';
+const VERSAO_APP = 'v17/09/2026-c';
 
 (async function init(){
   applyTheme(localStorage.getItem(THEME_KEY) || 'auto');
