@@ -6,7 +6,10 @@
  * nos backups JSON da versão anterior. Mudar os nomes faria o dono perder o que
  * está salvo no navegador. Código novo usa português; estas chaves ficam.
  */
+import type { Agendamento } from '@/features/agenda/tipos'
 import type { Enums } from '@/types/database'
+
+export type { Agendamento }
 
 export type TipoLancamento = Enums<'tipo_lancamento'> // receita | despesa | transferencia
 export type Origem = Enums<'origem_lancamento'> // conta | cartao
@@ -43,11 +46,6 @@ export interface Mes {
   bank: ResumoConta
   card: ResumoCartao
   transactions: Lancamento[]
-}
-
-export interface Agendamento extends Lancamento {
-  /** id da linha em `agendamentos` no Supabase; null enquanto não subiu. */
-  dbId: string | null
 }
 
 export interface Regra {

@@ -1,5 +1,5 @@
 import { chaveDoMes, dataIso, diasAte } from '@/lib/datas'
-import type { Agendamento } from '@/features/financas/tipos'
+import type { Agendamento } from './tipos'
 
 export type FiltroAgenda = '30' | 'todos' | 'mes'
 

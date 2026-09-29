@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Agendamento } from '@/features/financas/tipos'
+import type { Agendamento } from './tipos'
 import { textoPrazo } from '@/lib/datas'
 import { filtrarAgenda, resumirAgenda } from './resumo'
 

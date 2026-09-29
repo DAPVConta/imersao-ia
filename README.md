@@ -35,10 +35,14 @@ agenda do que ainda vai acontecer.
 - Reimportar o mesmo extrato não duplica lançamentos.
 
 **Agenda**
+- Botão *Agendar*: uma conta a pagar ou um dinheiro a receber, uma vez ou
+  todo mês (aluguel, salário, prestação), por quantos meses quiser.
+- Lançamento manual com data futura também vai para a agenda.
 - Tudo que tem data futura fica previsto, fora dos totais do mês.
 - Mostra o que há a pagar e a receber em 30 dias, o que passou da data e o
   resultado previsto do mês.
-- "Aconteceu" transforma a previsão em lançamento do mês certo.
+- "Aconteceu" pergunta a data e o valor reais (pagou antes, a conta veio
+  diferente) e transforma a previsão em lançamento do mês certo.
 
 **Geral**
 - Tema automático, claro ou escuro; funciona no celular e só com teclado.
@@ -127,6 +131,10 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **29/09/2026 — `v29/09/2026-b`**: agenda de pagamentos e recebimentos —
+  botão *Agendar* (uma vez ou todo mês) e confirmação com a data e o valor
+  reais. A agenda passou a ter um compartimento próprio no banco (schema
+  `agenda`); daqui em diante cada módulo novo ganha o seu.
 - **29/09/2026 — `v29/09/2026-a`**: novo design (cédula do mês com
   guilhochê, gráfico do ano que troca de mês, extrato em lista, fontes Public
   Sans e Bodoni Moda, navegação por teclado). Skills de design e do Supabase

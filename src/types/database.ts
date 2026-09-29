@@ -18,100 +18,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      agendamentos: {
-        Row: {
-          atualizado_em: string
-          categoria_id: string | null
-          competencia_id: string | null
-          criado_em: string
-          data_prevista: string
-          descricao: string
-          id: string
-          lancamento_id: string | null
-          observacoes: string | null
-          origem: Database["public"]["Enums"]["origem_lancamento"]
-          situacao: Database["public"]["Enums"]["situacao_agendamento"]
-          tipo: Database["public"]["Enums"]["tipo_lancamento"]
-          usuario_id: string | null
-          valor: number
-        }
-        Insert: {
-          atualizado_em?: string
-          categoria_id?: string | null
-          competencia_id?: string | null
-          criado_em?: string
-          data_prevista: string
-          descricao: string
-          id?: string
-          lancamento_id?: string | null
-          observacoes?: string | null
-          origem: Database["public"]["Enums"]["origem_lancamento"]
-          situacao?: Database["public"]["Enums"]["situacao_agendamento"]
-          tipo: Database["public"]["Enums"]["tipo_lancamento"]
-          usuario_id?: string | null
-          valor: number
-        }
-        Update: {
-          atualizado_em?: string
-          categoria_id?: string | null
-          competencia_id?: string | null
-          criado_em?: string
-          data_prevista?: string
-          descricao?: string
-          id?: string
-          lancamento_id?: string | null
-          observacoes?: string | null
-          origem?: Database["public"]["Enums"]["origem_lancamento"]
-          situacao?: Database["public"]["Enums"]["situacao_agendamento"]
-          tipo?: Database["public"]["Enums"]["tipo_lancamento"]
-          usuario_id?: string | null
-          valor?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "agendamentos_categoria_id_fkey"
-            columns: ["categoria_id"]
-            isOneToOne: false
-            referencedRelation: "categorias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agendamentos_competencia_id_fkey"
-            columns: ["competencia_id"]
-            isOneToOne: false
-            referencedRelation: "competencias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agendamentos_competencia_id_fkey"
-            columns: ["competencia_id"]
-            isOneToOne: false
-            referencedRelation: "vw_gastos_por_categoria"
-            referencedColumns: ["competencia_id"]
-          },
-          {
-            foreignKeyName: "agendamentos_competencia_id_fkey"
-            columns: ["competencia_id"]
-            isOneToOne: false
-            referencedRelation: "vw_resumo_competencia"
-            referencedColumns: ["competencia_id"]
-          },
-          {
-            foreignKeyName: "agendamentos_lancamento_id_fkey"
-            columns: ["lancamento_id"]
-            isOneToOne: false
-            referencedRelation: "lancamentos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agendamentos_lancamento_id_fkey"
-            columns: ["lancamento_id"]
-            isOneToOne: false
-            referencedRelation: "vw_lancamentos_detalhados"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cartoes: {
         Row: {
           apelido: string
@@ -544,6 +450,63 @@ export type Database = {
       }
     }
     Views: {
+      agendamentos: {
+        Row: {
+          atualizado_em: string | null
+          categoria_id: string | null
+          competencia_id: string | null
+          criado_em: string | null
+          data_prevista: string | null
+          descricao: string | null
+          id: string | null
+          lancamento_id: string | null
+          observacoes: string | null
+          origem: Database["public"]["Enums"]["origem_lancamento"] | null
+          parcela: number | null
+          situacao: "pendente" | "realizado" | "cancelado" | null
+          tipo: Database["public"]["Enums"]["tipo_lancamento"] | null
+          total_parcelas: number | null
+          usuario_id: string | null
+          valor: number | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          categoria_id?: string | null
+          competencia_id?: string | null
+          criado_em?: string | null
+          data_prevista?: string | null
+          descricao?: string | null
+          id?: string | null
+          lancamento_id?: string | null
+          observacoes?: string | null
+          origem?: Database["public"]["Enums"]["origem_lancamento"] | null
+          parcela?: number | null
+          situacao?: "pendente" | "realizado" | "cancelado" | null
+          tipo?: Database["public"]["Enums"]["tipo_lancamento"] | null
+          total_parcelas?: number | null
+          usuario_id?: string | null
+          valor?: number | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          categoria_id?: string | null
+          competencia_id?: string | null
+          criado_em?: string | null
+          data_prevista?: string | null
+          descricao?: string | null
+          id?: string | null
+          lancamento_id?: string | null
+          observacoes?: string | null
+          origem?: Database["public"]["Enums"]["origem_lancamento"] | null
+          parcela?: number | null
+          situacao?: "pendente" | "realizado" | "cancelado" | null
+          tipo?: Database["public"]["Enums"]["tipo_lancamento"] | null
+          total_parcelas?: number | null
+          usuario_id?: string | null
+          valor?: number | null
+        }
+        Relationships: []
+      }
       vw_agenda_detalhada: {
         Row: {
           atrasado: boolean | null
@@ -559,8 +522,10 @@ export type Database = {
           lancamento_id: string | null
           observacoes: string | null
           origem: Database["public"]["Enums"]["origem_lancamento"] | null
-          situacao: Database["public"]["Enums"]["situacao_agendamento"] | null
+          parcela: number | null
+          situacao: "pendente" | "realizado" | "cancelado" | null
           tipo: Database["public"]["Enums"]["tipo_lancamento"] | null
+          total_parcelas: number | null
           usuario_id: string | null
           valor: number | null
           valor_com_sinal: number | null
@@ -631,7 +596,6 @@ export type Database = {
     Enums: {
       natureza_categoria: "receita" | "despesa" | "transferencia"
       origem_lancamento: "conta" | "cartao"
-      situacao_agendamento: "pendente" | "realizado" | "cancelado"
       tipo_lancamento: "receita" | "despesa" | "transferencia"
       tipo_regra: "cnpj" | "mcc" | "palavra_chave"
     }
@@ -659,7 +623,6 @@ export const Constants = {
     Enums: {
       natureza_categoria: ["receita", "despesa", "transferencia"],
       origem_lancamento: ["conta", "cartao"],
-      situacao_agendamento: ["pendente", "realizado", "cancelado"],
       tipo_lancamento: ["receita", "despesa", "transferencia"],
       tipo_regra: ["cnpj", "mcc", "palavra_chave"],
     },

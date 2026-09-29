@@ -99,21 +99,54 @@ vercel.json                build, cache e rotas da Vercel
 ```
 
 Módulos que existem hoje: `financas` (dados, banco, regras), `painel`
-(gráficos e tabelas), `importacao` (manual, PDF, CSV, regras), `agenda`.
+(gráficos e tabelas), `importacao` (manual, PDF, CSV, regras), `agenda`
+(pagamentos e recebimentos previstos; schema `agenda` no banco).
 
 ## Como criar um módulo novo
 
 1. Pasta `src/features/<nome>/` com `tipos.ts`, `banco.ts`, `components/`.
-2. Se precisar de tabela nova: migração em `supabase/migrations/`
-   (`AAAAMMDDHHMMSS_descricao_em_portugues.sql`), aplicar pelo MCP do Supabase
-   (`apply_migration`), **habilitar RLS** e escrever as políticas na mesma
-   migração. Depois regenerar `src/types/database.ts`
+2. **Cada módulo novo ganha um schema próprio no banco** (ver "Um schema por
+   módulo" abaixo) — nada de tabela nova de módulo no `public`. Migração em
+   `supabase/migrations/` (`AAAAMMDDHHMMSS_descricao_em_portugues.sql`),
+   aplicada pelo MCP do Supabase (`apply_migration`), com **RLS habilitada** e
+   as políticas na mesma migração. Depois regenerar `src/types/database.ts`
    (MCP `generate_typescript_types` ou `npm run gerar-tipos`).
 3. Página em `src/pages/<nome>.tsx` e rota em `src/rotas.tsx`; link no
    `Cabecalho` se for uma área nova.
 4. Regras de cálculo em funções puras com teste `*.test.ts` ao lado.
 5. Testar a tela com Playwright (seção "Como testar"), subir `VERSAO_APP`,
    atualizar o README.md e publicar.
+
+## Um schema por módulo
+
+**Para cada módulo novo, criar um schema diferente no banco**, com o nome do
+módulo (`agenda`, `metas`, `investimentos`...). As tabelas, tipos (enum) e
+funções do módulo moram lá; o `public` guarda só o que é comum a todos
+(categorias, contas, cartões, competências, lançamentos) e as "janelas" da API.
+
+O schema do módulo **não é exposto** na API do Supabase (exigiria mexer no
+painel do Supabase). O site conversa com ele por visões em `public`, como a
+agenda faz (migração `20260929002345_agenda_em_schema_proprio.sql`):
+
+```sql
+create schema <modulo>;
+grant usage on schema <modulo> to anon, authenticated, service_role;
+create table <modulo>.<tabela> (...);
+alter table <modulo>.<tabela> enable row level security;
+create policy ... on <modulo>.<tabela> ...;          -- as regras de sempre
+grant select, insert, update, delete on <modulo>.<tabela> to anon, authenticated, service_role;
+-- janela da API: visão simples = dá para ler e gravar por ela
+create view public.<tabela> with (security_invoker = on) as select ... from <modulo>.<tabela>;
+revoke all on public.<tabela> from anon, authenticated;
+grant select, insert, update, delete on public.<tabela> to anon, authenticated;
+```
+
+- `security_invoker = on` é obrigatório: faz a RLS da tabela valer para quem
+  consulta pela visão. Sem isso a visão ignora a RLS.
+- Visão de uma tabela só (sem join, sem agregação) aceita insert, update,
+  delete e upsert com `onConflict` direto — o código do front usa
+  `supabase.from('<tabela>')` normalmente. Visão com join é só leitura.
+- Testar as permissões com `set local role anon;` pelo MCP antes de publicar.
 
 ## Convenções de código
 
@@ -203,8 +236,8 @@ endereço) e o caminho de volta (autenticar, mesmo que anonimamente, e voltar à
 políticas por dono). Não reverter isso sem ele pedir. Toda consulta do painel
 filtra `.is('usuario_id', null)`.
 
-Só `competencias`, `faturas`, `lancamentos` e `agendamentos` estão abertas para
-escrita. `categorias`, `contas`, `cartoes`, `regras_categorizacao` e `perfis`
+Só `competencias`, `faturas`, `lancamentos` e `agendamentos` (esta pela janela
+`public.agendamentos`, sobre `agenda.agendamentos`) estão abertas para escrita. `categorias`, `contas`, `cartoes`, `regras_categorizacao` e `perfis`
 seguem somente-leitura para o visitante.
 
 Deduplicação: `lancamentos` tem índice único em
@@ -235,11 +268,20 @@ um lançamento e editar regras de categorização afetam só o navegador.
 
 ## Agenda
 
-`agendamentos` guarda o que ainda não aconteceu. Um lançamento manual com data
+Módulo `src/features/agenda/` (tipos, banco, ações, repetição mensal e tela) e
+schema `agenda` no banco. `agenda.agendamentos` guarda o que ainda não
+aconteceu; o site lê e grava pela visão `public.agendamentos` e lê com a
+categoria resolvida por `public.vw_agenda_detalhada`.
+
+Há dois jeitos de agendar: o botão **Agendar** da seção Agenda (pagar ou
+receber, uma vez ou todo mês por N meses — cada mês vira uma linha com
+`parcela`/`total_parcelas`, dia 31 cai no último dia dos meses curtos) e o
+lançamento manual com data futura. Ao clicar em "Aconteceu", o dono confirma a
+data e o valor reais (podem diferir do previsto; data futura não é aceita). Um lançamento manual com data
 futura vai para lá em vez de entrar nos totais do mês — previsão não é fato, e
 somar as duas coisas faria o saldo mostrar dinheiro que não saiu nem entrou.
-Quando o dono clica em "Aconteceu", o agendamento vira um lançamento no mês da
-data prevista e guarda o vínculo (`lancamento_id`, `situacao = 'realizado'`),
+Quando o dono confirma, o agendamento vira um lançamento no mês da data em
+que aconteceu e guarda o vínculo (`lancamento_id`, `situacao = 'realizado'`),
 para não ser confirmado duas vezes. A visão `vw_agenda_detalhada` já traz a
 categoria resolvida, como `vw_lancamentos_detalhados` faz com os lançamentos.
 

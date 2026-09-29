@@ -1,18 +1,22 @@
-import { Check, X } from 'lucide-react'
-import { Fragment, useMemo, useState, type ReactNode } from 'react'
+import { Check, Plus, X } from 'lucide-react'
+import { Fragment, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { confirmarAgendamento, removerAgendamento } from '@/features/financas/acoes'
 import { ROTULO_ORIGEM } from '@/features/financas/categorias'
 import { CategoriaTag } from '@/features/financas/components/categoria-tag'
-import type { Agendamento } from '@/features/financas/tipos'
-import { chaveDoMes, dataIso, diasAte, textoPrazo } from '@/lib/datas'
+import { avisar } from '@/lib/avisos'
+import { chaveDoMes, dataIso, diasAte, hojeIso, textoPrazo } from '@/lib/datas'
 import { fmtBRL, mesAbreviado, rotuloMes } from '@/lib/formato'
 import { mesPorExtenso } from '@/lib/formato-mes'
 import { cn } from '@/lib/utils'
+import { confirmarAgendamento, removerAgendamento } from '../acoes'
 import { filtrarAgenda, ordenarAgenda, resumirAgenda, type FiltroAgenda } from '../resumo'
+import type { Agendamento } from '../tipos'
+import { FormAgendar } from './form-agendar'
 
 function Numero({ rotulo, valor, rodape, tom }: { rotulo: string; valor: ReactNode; rodape: ReactNode; tom?: 'bom' | 'ruim' }) {
   return (
@@ -28,8 +32,7 @@ const corValor = { despesa: 'text-debit-deep', receita: 'text-credit-deep', tran
 const sinal = { despesa: '-', receita: '+', transferencia: '' }
 const corPrazo = { venceu: 'text-debit-deep font-semibold', perto: 'text-gold font-semibold', normal: 'text-ink-mute' }
 
-function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) => void }) {
-  const [confirmando, setConfirmando] = useState(false)
+function Item({ a, aoConfirmar, aoRemover }: { a: Agendamento; aoConfirmar: (a: Agendamento) => void; aoRemover: (a: Agendamento) => void }) {
   const iso = dataIso(a.date)!
   const dias = diasAte(iso)
   const prazo = textoPrazo(dias)
@@ -50,6 +53,7 @@ function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) =>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
           <CategoriaTag nome={a.category} />
           <span className="text-[13px] text-ink-mute">{ROTULO_ORIGEM[a.source]}</span>
+          {a.parcela && a.parcelas && <span className="text-[13px] text-ink-mute" title="Repete todo mês">{a.parcela}ª de {a.parcelas}</span>}
           <span className={cn('text-[13px]', corPrazo[prazo.tom])}>{prazo.texto}</span>
         </div>
       </div>
@@ -57,11 +61,8 @@ function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) =>
         {sinal[a.type] && <span aria-hidden="true">{sinal[a.type] === '-' ? '−' : '+'}</span>}{fmtBRL(a.value)}
       </div>
       <div className="flex justify-end gap-1.5 [grid-area:acoes]">
-        <Button
-          size="sm" disabled={confirmando} title="Já aconteceu: vira lançamento do mês"
-          onClick={() => { setConfirmando(true); void confirmarAgendamento(a.id) }}
-        >
-          <Check /> {confirmando ? 'Confirmando...' : 'Aconteceu'}
+        <Button size="sm" title="Já aconteceu: vira lançamento do mês" onClick={() => aoConfirmar(a)}>
+          <Check /> Aconteceu
         </Button>
         <Button variant="ghost" size="icon" className="text-ink-mute" title="Remover da agenda" aria-label={`Remover ${a.desc} da agenda`} onClick={() => aoRemover(a)}>
           <X />
@@ -72,12 +73,70 @@ function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) =>
 }
 
 /**
+ * "Aconteceu": pergunta quando e quanto, porque nem sempre é o previsto (pagou
+ * uns dias antes, a conta de luz veio diferente). Não aceita data futura — o
+ * que ainda não aconteceu continua na agenda.
+ */
+function ConfirmarAconteceu({ item, aoFechar }: { item: Agendamento | null; aoFechar: () => void }) {
+  const hoje = hojeIso()
+  const previsto = item ? dataIso(item.date)! : hoje
+  const [data, setData] = useState(previsto < hoje ? previsto : hoje)
+  const [valor, setValor] = useState(item ? String(item.value) : '')
+
+  const enviar = (e: FormEvent) => {
+    e.preventDefault()
+    const numero = parseFloat(valor.replace(',', '.'))
+    if (!item) return
+    if (!data || data > hoje) {
+      avisar('Escolha a data em que aconteceu: hoje ou antes.', 'erro')
+      return
+    }
+    if (isNaN(numero) || numero <= 0) {
+      avisar('Informe o valor que foi pago ou recebido.', 'erro')
+      return
+    }
+    void confirmarAgendamento(item.id, { data, valor: numero })
+    aoFechar()
+  }
+
+  const recebeu = item?.type === 'receita'
+  return (
+    <Dialog open={!!item} onOpenChange={(aberto) => !aberto && aoFechar()}>
+      <DialogContent>
+        <form onSubmit={enviar} className="grid gap-4">
+          <DialogTitle>{recebeu ? 'Recebeu?' : 'Pagou?'}</DialogTitle>
+          <DialogDescription>
+            “{item?.desc}” sai da agenda e entra nos lançamentos do mês da data abaixo. Confira se foi no dia e no valor previstos.
+          </DialogDescription>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="ok-data">{recebeu ? 'Recebido em' : 'Pago em'}</Label>
+              <Input id="ok-data" type="date" max={hoje} value={data} onChange={(e) => setData(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="ok-valor">Valor (R$)</Label>
+              <Input id="ok-valor" type="number" inputMode="decimal" step="0.01" min="0" value={valor} onChange={(e) => setValor(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={aoFechar}>Cancelar</Button>
+            <Button type="submit" variant="default">{recebeu ? 'Confirmar recebimento' : 'Confirmar pagamento'}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/**
  * Agenda: o que ainda não aconteceu. Lançamento com data futura entra aqui e
  * fica fora dos totais do mês até o dono clicar em "Aconteceu".
  */
 export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]; mesAtual: string | null; saldoDoMes: number }) {
   const [filtro, setFiltro] = useState<FiltroAgenda>('30')
   const [removendo, setRemovendo] = useState<Agendamento | null>(null)
+  const [confirmando, setConfirmando] = useState<Agendamento | null>(null)
+  const [agendando, setAgendando] = useState(false)
 
   const itens = useMemo(() => ordenarAgenda(agenda), [agenda])
   const resumo = useMemo(() => resumirAgenda(itens, mesAtual, saldoDoMes), [itens, mesAtual, saldoDoMes])
@@ -85,7 +144,12 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
 
   return (
     <Card>
-      <CardTitle dica="O que ainda não aconteceu. Lançamentos com data futura esperam aqui e só entram no mês quando você confirma.">Agenda</CardTitle>
+      <CardTitle
+        dica="Contas a pagar e dinheiro a receber. Esperam aqui, fora dos totais, e só entram no mês quando você marca que aconteceu."
+        acao={<Button variant="outline" onClick={() => setAgendando(true)}><Plus /> Agendar</Button>}
+      >
+        Agenda
+      </CardTitle>
 
       <dl className="mb-6 flex flex-wrap gap-x-10 gap-y-4">
         <Numero rotulo="A pagar" valor={fmtBRL(resumo.aPagar30)} rodape="nos próximos 30 dias" tom="ruim" />
@@ -116,7 +180,7 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
         <div className="py-8 text-center text-[14px] text-ink-mute">
           {itens.length
             ? 'Nada previsto nesse recorte — troque o filtro acima para ver o resto.'
-            : 'Nada agendado. Lance algo com data futura em “Lançamento manual” e ele aparece aqui.'}
+            : 'Nada agendado. Use “Agendar” para lembrar de uma conta ou de um dinheiro que vai entrar — uma vez ou todo mês.'}
         </div>
       ) : (
         visiveis.map((a, i) => {
@@ -129,11 +193,15 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
                   {mesPorExtenso(chave)}
                 </div>
               )}
-              <Item a={a} aoRemover={setRemovendo} />
+              <Item a={a} aoConfirmar={setConfirmando} aoRemover={setRemovendo} />
             </Fragment>
           )
         })
       )}
+
+      {/* key: o formulário recomeça com a data e o valor de cada item */}
+      <ConfirmarAconteceu key={confirmando?.id ?? 'nenhum'} item={confirmando} aoFechar={() => setConfirmando(null)} />
+      <FormAgendar aberto={agendando} aoFechar={() => setAgendando(false)} />
 
       <Dialog open={!!removendo} onOpenChange={(aberto) => !aberto && setRemovendo(null)}>
         <DialogContent>

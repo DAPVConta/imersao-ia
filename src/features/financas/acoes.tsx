@@ -5,15 +5,17 @@
  * 2) sobe para o banco; 3) se o banco falhar, avisa — o dado fica salvo neste
  * navegador, mas não aparece nos outros aparelhos.
  */
+import { agendar } from '@/features/agenda/acoes'
+import { lerAgenda } from '@/features/agenda/banco'
 import { avisar } from '@/lib/avisos'
-import { chaveDoMes, dataIso, diasAte, ehDataFutura, textoPrazo } from '@/lib/datas'
+import { diasAte, ehDataFutura, textoPrazo } from '@/lib/datas'
 import { rotuloMes } from '@/lib/formato'
 import * as banco from './banco'
 import { novoId } from './calculos'
 import { classificarExtrato, classificarFatura, REGRAS_PADRAO } from './classificacao'
 import { DEMO } from './demo'
 import { alterarBase, escolherMes, financas, garantirMes } from './store'
-import type { Agendamento, BaseLocal, Lancamento, LancamentoNovo, ResumoCartao, ResumoConta } from './tipos'
+import type { BaseLocal, Lancamento, LancamentoNovo, ResumoCartao, ResumoConta } from './tipos'
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -36,7 +38,7 @@ export async function iniciar() {
     avisos.push(`não foi possível ler os lançamentos do banco (${msg(e)})`)
   }
   try {
-    copia.agenda = await banco.lerAgenda(copia.agenda)
+    copia.agenda = await lerAgenda(copia.agenda)
     agendados = copia.agenda.length
   } catch (e) {
     avisos.push(`não foi possível ler a agenda (${msg(e)})`)
@@ -89,7 +91,7 @@ export async function lancarManual(dataIsoForm: string, dados: Omit<LancamentoNo
         {textoPrazo(diasAte(dataIsoForm)).texto}). Não entra nos totais do mês até você confirmar que aconteceu.
       </>,
     )
-    await agendar({ id: novoId('ag'), dbId: null, date, ...dados })
+    await agendar([{ id: novoId('ag'), dbId: null, date, ...dados }])
     return
   }
 
@@ -188,67 +190,6 @@ export function mudarCategoriaDaRegra(grupo: 'cnpj' | 'mcc', chave: string, cate
 
 export function excluirRegra(grupo: 'cnpj' | 'mcc', chave: string) {
   alterarBase((b) => void delete b.rules[grupo][chave])
-}
-
-/* ---------------- agenda ---------------- */
-
-/** Guarda aqui na hora (a tela responde já) e sobe ao banco. */
-export async function agendar(item: Agendamento) {
-  alterarBase((b) => void b.agenda.push(item))
-  try {
-    const dbId = await banco.salvarAgendamento(item)
-    alterarBase((b) => {
-      const a = b.agenda.find((x) => x.id === item.id)
-      if (a) a.dbId = dbId
-    })
-  } catch (e) {
-    avisar(`Agendado neste navegador, mas não deu para gravar no banco (${msg(e)}). Ele não vai aparecer nos outros aparelhos.`, 'erro')
-  }
-}
-
-/** "Aconteceu": sai da agenda e entra como lançamento no mês da data prevista. */
-export async function confirmarAgendamento(id: string) {
-  const item = financas.ler().base.agenda.find((a) => a.id === id)
-  if (!item) return
-  const chave = chaveDoMes(dataIso(item.date))
-  if (!chave) return
-
-  alterarBase((b) => {
-    const mes = garantirMes(b, chave)
-    const jaExiste = mes.transactions.some(
-      (t) => t.date === item.date && t.desc === item.desc && t.value === item.value && t.source === item.source,
-    )
-    if (!jaExiste) {
-      mes.transactions.push({
-        id: novoId(), date: item.date, desc: item.desc, type: item.type,
-        source: item.source, category: item.category, value: item.value,
-      })
-    }
-    b.agenda = b.agenda.filter((a) => a.id !== id)
-  })
-  avisar(`“${item.desc}” virou lançamento de ${rotuloMes(chave)}.`)
-
-  try {
-    const competenciaId = await banco.garantirCompetencia(chave, financas.ler().base.months[chave].bank)
-    const lancamentoId = await banco.salvarUmLancamento(competenciaId, item)
-    if (item.dbId) await banco.marcarAgendamentoRealizado(item.dbId, lancamentoId, competenciaId)
-  } catch (e) {
-    avisar(`Confirmado aqui, mas o banco não recebeu (${msg(e)}). Tente de novo mais tarde.`, 'erro')
-  }
-}
-
-export async function removerAgendamento(id: string) {
-  const item = financas.ler().base.agenda.find((a) => a.id === id)
-  if (!item) return
-  alterarBase((b) => {
-    b.agenda = b.agenda.filter((a) => a.id !== id)
-  })
-  if (!item.dbId) return
-  try {
-    await banco.excluirAgendamento(item.dbId)
-  } catch (e) {
-    avisar(`Removido daqui, mas continua no banco (${msg(e)}).`, 'erro')
-  }
 }
 
 /* ---------------- backup ---------------- */

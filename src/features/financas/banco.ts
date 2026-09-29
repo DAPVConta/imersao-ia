@@ -10,10 +10,9 @@
 import { dataBr, dataIso } from '@/lib/datas'
 import { erroDoBanco, supabase } from '@/lib/supabase'
 import { garantirMes } from './store'
-import type { Agendamento, BaseLocal, Lancamento, LancamentoNovo, ResumoCartao, ResumoConta } from './tipos'
+import type { BaseLocal, Lancamento, LancamentoNovo, ResumoCartao, ResumoConta } from './tipos'
 
 const CHAVE_DEDUP_LANCAMENTOS = 'competencia_id,origem,data,descricao,valor'
-const CHAVE_DEDUP_AGENDAMENTOS = 'usuario_id,origem,data_prevista,descricao,valor'
 
 const numeroOuNulo = (v: number | null | undefined) => (v == null ? null : Number(v))
 
@@ -90,38 +89,10 @@ export async function sincronizarMeses(base: BaseLocal): Promise<number> {
   return importados
 }
 
-/**
- * Agenda pendente do banco. Aqui o banco manda (a agenda precisa ser igual em
- * todos os aparelhos); só o que ainda não subiu (dbId nulo) é preservado.
- */
-export async function lerAgenda(locais: Agendamento[]): Promise<Agendamento[]> {
-  const { data, error } = await supabase
-    .from('vw_agenda_detalhada')
-    .select('id,data_prevista,descricao,tipo,origem,valor,categoria')
-    .is('usuario_id', null)
-    .eq('situacao', 'pendente')
-    .order('data_prevista', { ascending: true })
-  if (error) throw erroDoBanco(error, 'agenda')
-
-  const doBanco: Agendamento[] = data
-    .filter((l) => l.id && l.tipo && l.origem)
-    .map((l) => ({
-      id: 'ag_' + l.id,
-      dbId: l.id,
-      date: dataBr(l.data_prevista),
-      desc: l.descricao ?? '',
-      type: l.tipo!,
-      source: l.origem!,
-      category: l.categoria || 'Outros',
-      value: Number(l.valor),
-    }))
-  return doBanco.concat(locais.filter((a) => !a.dbId))
-}
-
 let mapaCategorias: Record<string, string> | null = null
 
 /** nome da categoria → id no banco (lido uma vez por sessão) */
-async function idsDasCategorias(): Promise<Record<string, string>> {
+export async function idsDasCategorias(): Promise<Record<string, string>> {
   if (mapaCategorias) return mapaCategorias
   const { data, error } = await supabase.from('categorias').select('id,nome').is('usuario_id', null)
   if (error) throw erroDoBanco(error, 'categorias')
@@ -129,7 +100,7 @@ async function idsDasCategorias(): Promise<Record<string, string>> {
   return mapaCategorias
 }
 
-const idCategoria = (cats: Record<string, string>, nome: string) => cats[nome] || cats['Outros'] || null
+export const idCategoria = (cats: Record<string, string>, nome: string) => cats[nome] || cats['Outros'] || null
 
 /* ---------------- gravação ---------------- */
 
@@ -228,40 +199,4 @@ export async function enviarImportacao(
   const id = await garantirCompetencia(chave, conta)
   if (cartao) await salvarFatura(id, cartao)
   return salvarLancamentos(id, lancamentos)
-}
-
-/* ---------------- agenda ---------------- */
-
-/** Grava uma previsão. O índice de deduplicação impede duplicar num clique em dobro. */
-export async function salvarAgendamento(item: LancamentoNovo): Promise<string | null> {
-  const cats = await idsDasCategorias()
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .upsert(
-      {
-        data_prevista: dataIso(item.date)!,
-        descricao: item.desc,
-        tipo: item.type,
-        origem: item.source,
-        valor: item.value,
-        categoria_id: idCategoria(cats, item.category),
-      },
-      { onConflict: CHAVE_DEDUP_AGENDAMENTOS },
-    )
-    .select('id')
-  if (error) throw erroDoBanco(error, 'agendamentos')
-  return data[0]?.id ?? null
-}
-
-export async function marcarAgendamentoRealizado(dbId: string, lancamentoId: string | null, competenciaId: string) {
-  const { error } = await supabase
-    .from('agendamentos')
-    .update({ situacao: 'realizado', lancamento_id: lancamentoId, competencia_id: competenciaId })
-    .eq('id', dbId)
-  if (error) throw erroDoBanco(error, 'agendamentos')
-}
-
-export async function excluirAgendamento(dbId: string) {
-  const { error } = await supabase.from('agendamentos').delete().eq('id', dbId)
-  if (error) throw erroDoBanco(error, 'agendamentos')
 }
