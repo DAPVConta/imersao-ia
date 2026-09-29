@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardTitle } from '@/components/ui/card'
+import { Card, CardTitle, Superficie } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -11,10 +11,11 @@ import { CategoriaTag } from '@/features/financas/components/categoria-tag'
 import type { Mes } from '@/features/financas/tipos'
 import { dataIso } from '@/lib/datas'
 import { fmtBRL } from '@/lib/formato'
+import { nomeDoMes } from '@/lib/formato-mes'
 import { cn } from '@/lib/utils'
 
 const TODOS = 'todos'
-const corValor = { despesa: 'text-debit-deep', receita: 'text-credit-deep', transferencia: 'font-medium text-ink-mute' }
+const corValor = { despesa: 'text-debit-deep', receita: 'text-credit-deep', transferencia: 'font-normal text-ink-mute' }
 const sinal = { despesa: '-', receita: '+', transferencia: '' }
 
 export function TabelaLancamentos({ chave, mes }: { chave: string; mes: Mes | undefined }) {
@@ -37,9 +38,11 @@ export function TabelaLancamentos({ chave, mes }: { chave: string; mes: Mes | un
 
   return (
     <Card>
-      <CardTitle>Lançamentos do mês</CardTitle>
-      <div className="mb-[15px] flex flex-wrap items-center gap-[9px]">
-        <Input placeholder="Buscar descrição..." value={busca} onChange={(e) => setBusca(e.target.value)} className="h-8 w-[220px] text-[12.8px]" />
+      <CardTitle dica="Transferências (pagar a fatura, guardar na reserva) aparecem em cinza e não contam como entrada nem saída.">
+        Extrato de {nomeDoMes(chave)}
+      </CardTitle>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Input placeholder="Buscar pela descrição" aria-label="Buscar pela descrição" value={busca} onChange={(e) => setBusca(e.target.value)} className="h-8 w-full text-[13px] sm:w-[240px]" />
         <Select value={categoria} onValueChange={setCategoria}>
           <SelectTrigger size="sm" className="w-auto min-w-[150px]" aria-label="Filtrar por categoria"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -64,8 +67,9 @@ export function TabelaLancamentos({ chave, mes }: { chave: string; mes: Mes | un
             <SelectItem value="transferencia">Transferência</SelectItem>
           </SelectContent>
         </Select>
-        <span className="ml-auto text-[11.5px] text-ink-mute">{lista.length} lançamento(s)</span>
+        <span className="ml-auto text-[13px] text-ink-mute">{lista.length === 1 ? '1 lançamento' : `${lista.length} lançamentos`}</span>
       </div>
+      <Superficie className="overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -79,16 +83,16 @@ export function TabelaLancamentos({ chave, mes }: { chave: string; mes: Mes | un
         </TableHeader>
         <TableBody>
           {lista.map((t) => (
-            <TableRow key={t.id} className="even:stripe hover:bg-paper-2">
-              <TableCell>{t.date}</TableCell>
+            <TableRow key={t.id} className="hover:bg-paper-2/60">
+              <TableCell className="num whitespace-nowrap text-ink-2">{t.date.slice(0, 5)}</TableCell>
               <TableCell>{t.desc}</TableCell>
               <TableCell><CategoriaTag nome={t.category} /></TableCell>
-              <TableCell>{ROTULO_ORIGEM[t.source]}</TableCell>
+              <TableCell className="text-ink-2">{ROTULO_ORIGEM[t.source]}</TableCell>
               <TableCell className={cn('num whitespace-nowrap text-right font-semibold', corValor[t.type])}>
-                {sinal[t.type]}{fmtBRL(t.value)}
+                {sinal[t.type] && <span aria-hidden="true">{sinal[t.type] === '-' ? '−' : '+'}</span>}{fmtBRL(t.value)}
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="icon" onClick={() => excluirLancamento(chave, t.id)} aria-label={`Excluir ${t.desc}`}>
+                <Button variant="ghost" size="icon" className="size-7 text-ink-mute" title="Excluir deste navegador" onClick={() => excluirLancamento(chave, t.id)} aria-label={`Excluir ${t.desc}`}>
                   <X />
                 </Button>
               </TableCell>
@@ -96,6 +100,12 @@ export function TabelaLancamentos({ chave, mes }: { chave: string; mes: Mes | un
           ))}
         </TableBody>
       </Table>
+      {!lista.length && (
+        <p className="px-4 py-8 text-center text-[14px] text-ink-mute">
+          {mes?.transactions.length ? 'Nenhum lançamento com esses filtros.' : 'Nenhum lançamento neste mês ainda. Use “Lançar” no topo ou importe o extrato.'}
+        </p>
+      )}
+      </Superficie>
     </Card>
   )
 }

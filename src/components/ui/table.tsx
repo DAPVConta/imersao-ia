@@ -3,8 +3,8 @@ import { cn } from '@/lib/utils'
 
 /** Tabela com rolagem própria e cabeçalho fixo. */
 function Table({ className, contida = true, ...props }: React.HTMLAttributes<HTMLTableElement> & { contida?: boolean }) {
-  const tabela = <table className={cn('w-full border-collapse text-[12.8px]', className)} {...props} />
-  return contida ? <div className="max-h-[560px] overflow-auto rounded-sm">{tabela}</div> : tabela
+  const tabela = <table className={cn('w-full border-collapse text-[13.5px]', className)} {...props} />
+  return contida ? <div className="max-h-[560px] overflow-auto">{tabela}</div> : tabela
 }
 
 const TableHeader = (props: React.HTMLAttributes<HTMLTableSectionElement>) => <thead {...props} />
@@ -18,8 +18,8 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   return (
     <th
       className={cn(
-        'sticky top-0 z-[1] border-b-2 border-rule-strong bg-sheet px-[11px] py-2.5 text-left align-middle',
-        'text-[10px] font-extrabold uppercase tracking-[.11em] text-ink-mute',
+        'sticky top-0 z-[1] border-b border-rule-strong bg-sheet px-3 py-2.5 text-left align-bottom',
+        'text-[12.5px] font-medium text-ink-mute',
         className,
       )}
       {...props}
@@ -28,7 +28,7 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
 }
 
 function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn('border-b border-rule px-[11px] py-2.5 text-left align-middle', className)} {...props} />
+  return <td className={cn('border-b border-rule px-3 py-2.5 text-left align-middle', className)} {...props} />
 }
 
 export { Table, TableBody, TableCell, TableHead, TableHeader, TableRow }

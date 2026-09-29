@@ -1,17 +1,16 @@
 import { useMemo } from 'react'
 import { Agenda } from '@/features/agenda/components/agenda'
+import { resumirAgenda } from '@/features/agenda/resumo'
 import { serieMensal, totaisDoMes } from '@/features/financas/calculos'
 import { useFinancas } from '@/features/financas/store'
 import { PainelImportacao } from '@/features/importacao/components/painel-importacao'
-import { CartoesResumo } from '@/features/painel/components/cartoes-resumo'
-import { DespesasPorCategoria } from '@/features/painel/components/despesas-por-categoria'
-import { EvolucaoMensal } from '@/features/painel/components/evolucao-mensal'
-import { GastosPorMes } from '@/features/painel/components/gastos-por-mes'
-import { Indicadores } from '@/features/painel/components/indicadores'
-import { ResumoFatura } from '@/features/painel/components/resumo-fatura'
+import { CedulaDoMes } from '@/features/painel/components/cedula-do-mes'
+import { ContaECartao } from '@/features/painel/components/conta-e-cartao'
+import { LinhaDoAno } from '@/features/painel/components/linha-do-ano'
+import { ParaOndeFoi } from '@/features/painel/components/para-onde-foi'
 import { TabelaLancamentos } from '@/features/painel/components/tabela-lancamentos'
 
-/** Página principal: o painel mensal. */
+/** Página principal: o fechamento do mês (layout em docs/design.md). */
 export function PaginaPainel() {
   const base = useFinancas((e) => e.base)
   const mesAtual = useFinancas((e) => e.mesAtual)
@@ -20,28 +19,31 @@ export function PaginaPainel() {
   const mes = mesAtual ? base.months[mesAtual] : undefined
   const serie = useMemo(() => serieMensal(base), [base])
   const totais = useMemo(() => totaisDoMes(mes), [mes])
+  const previsto = useMemo(() => resumirAgenda(base.agenda, mesAtual, totais.saldo).saldoPrevisto, [base.agenda, mesAtual, totais.saldo])
 
   if (carregando) {
-    return <div className="py-24 text-center text-sm font-semibold text-on-navy-2">Carregando seus dados…</div>
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-[15px] text-ink-mute" role="status">
+        Abrindo suas finanças…
+      </div>
+    )
   }
 
   return (
     <>
+      {mesAtual && mes && <CedulaDoMes chave={mesAtual} totais={totais} serie={serie} saldoPrevisto={previsto} />}
+      <div className="mt-8">
+        <LinhaDoAno serie={serie} mesAtual={mesAtual} />
+      </div>
       {mesAtual && mes && (
-        <>
-          <Indicadores key={mesAtual} totais={totais} serie={serie} mesAtual={mesAtual} />
-          <CartoesResumo mes={mes} />
-          <div className="grid grid-cols-1 gap-5 min-[861px]:grid-cols-[1.1fr_.9fr]">
-            <DespesasPorCategoria totais={totais} />
-            <ResumoFatura cartao={mes.card} />
-          </div>
-        </>
+        <div className="grid gap-x-14 border-t border-rule pt-8 lg:grid-cols-[1.15fr_1fr]">
+          <ParaOndeFoi totais={totais} />
+          <ContaECartao mes={mes} />
+        </div>
       )}
-      <EvolucaoMensal serie={serie} mesAtual={mesAtual} />
-      <GastosPorMes serie={serie} mesAtual={mesAtual} />
-      <PainelImportacao />
       <Agenda agenda={base.agenda} mesAtual={mesAtual} saldoDoMes={totais.saldo} />
       {mesAtual && <TabelaLancamentos chave={mesAtual} mes={mes} />}
+      <PainelImportacao />
     </>
   )
 }

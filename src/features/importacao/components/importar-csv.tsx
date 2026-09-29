@@ -11,7 +11,7 @@ export function ImportarCsv() {
 
   return (
     <div>
-      <p className="mb-2 text-[11.5px] text-ink-mute">
+      <p className="mb-2 text-[13.5px] text-ink-mute">
         Uma linha por lançamento: <code>data;descrição;tipo;origem;categoria;valor</code>
         <br />
         tipo = receita|despesa|transferencia · origem = conta|cartao · data = DD/MM/AAAA

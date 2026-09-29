@@ -9,12 +9,16 @@ agenda do que ainda vai acontecer.
 ## O que o sistema faz
 
 **Painel do mês**
-- Escolha o mês no topo; o painel abre no mês mais recente.
-- Receitas, despesas e resultado do mês, com mini-gráfico da evolução e
-  percentual de poupança.
-- Saldo da conta, fatura do cartão, uso do limite e pagamento mínimo.
-- Despesas por categoria (gráfico de rosca) e resumo da fatura.
-- Evolução de receitas × despesas e total de gastos por mês com linha de média.
+- Troque de mês pelas setas do topo, pela lista, pelas teclas ← → ou clicando
+  no mês no gráfico do ano. O painel abre no mês mais recente.
+- **Cédula do mês:** quanto sobrou (ou faltou), o que entrou e saiu, a
+  comparação com o mês anterior e a previsão contando a agenda. O rendilhado
+  (guilhochê, como o das notas de dinheiro) muda de desenho a cada mês e o anel
+  em volta mostra quanto da receita sobrou.
+- **O ano mês a mês:** entradas para cima, saídas para baixo, com a média de
+  gastos.
+- **Para onde foi o dinheiro:** despesas por categoria, da maior para a menor.
+- **Conta e cartão:** saldo da conta, fatura, uso do limite e pagamento mínimo.
 - Transferências (pagar a fatura, aplicar na reserva) não contam como receita
   nem despesa — só movem dinheiro de lugar.
 
@@ -37,11 +41,11 @@ agenda do que ainda vai acontecer.
 - "Aconteceu" transforma a previsão em lançamento do mês certo.
 
 **Geral**
-- Tema automático, claro ou escuro; funciona no celular.
+- Tema automático, claro ou escuro; funciona no celular e só com teclado.
 - Os dados ficam no banco (Supabase) e aparecem em qualquer aparelho; o
   navegador guarda uma cópia e continua funcionando se o banco cair.
 - Backup: exportar e importar tudo em um arquivo JSON.
-- A versão aparece no rodapé (ex.: `v28/09/2026-a`) para conferir se o
+- A versão aparece no rodapé (ex.: `v29/09/2026-a`) para conferir se o
   navegador pegou a atualização.
 
 ## Tecnologia
@@ -49,14 +53,28 @@ agenda do que ainda vai acontecer.
 | Camada | Tecnologia |
 |---|---|
 | Front | React 18, TypeScript, Vite |
-| Visual | Tailwind CSS, shadcn/ui (Radix UI), class-variance-authority |
+| Visual | Tailwind CSS, shadcn/ui (Radix UI), class-variance-authority; fontes Public Sans e Bodoni Moda |
 | Back | Supabase — Postgres com RLS, Auth, Storage, Edge Functions |
 | Deploy | Vercel (publica sozinha a cada push no ramo de produção) |
 | Testes | Vitest e Playwright |
 
 Leitura de PDF com [pdf.js](https://mozilla.github.io/pdf.js/), carregado só
-quando alguém anexa um arquivo. Fontes Inter e JetBrains Mono servidas pelo
-próprio site, sem CDN.
+quando alguém anexa um arquivo. Fontes servidas pelo próprio site, sem CDN.
+
+## Design
+
+A identidade visual vem do dinheiro impresso: papel-moeda levemente
+esverdeado, tinta verde-pinho, as cores das cédulas de real nas categorias e o
+guilhochê das notas como assinatura. As decisões (paleta, fontes, layout, o
+que evitar) estão em [`docs/design.md`](docs/design.md).
+
+## Skills do projeto
+
+Em `.claude/skills/`, usadas pelo Claude Code em todo trabalho neste
+repositório (a regra está no `CLAUDE.md`):
+
+- `frontend-design` ([anthropics/skills](https://github.com/anthropics/skills/tree/main/skills/frontend-design)) — design de interface.
+- `supabase` e `supabase-postgres-best-practices` ([supabase/agent-skills](https://github.com/supabase/agent-skills)) — banco, segurança e desempenho.
 
 ## Rodar na sua máquina
 
@@ -109,6 +127,11 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **29/09/2026 — `v29/09/2026-a`**: novo design (cédula do mês com
+  guilhochê, gráfico do ano que troca de mês, extrato em lista, fontes Public
+  Sans e Bodoni Moda, navegação por teclado). Skills de design e do Supabase
+  instaladas; índices nas chaves estrangeiras do banco (recomendação dos
+  advisors do Supabase); versões dos pacotes fixadas.
 - **28/09/2026 — v2 (`v28/09/2026-a`)**: sistema reescrito em React +
   TypeScript + Vite + Tailwind + shadcn/ui, organizado em módulos, com testes
   automáticos e build na Vercel. O visual, as funções e os dados salvos no

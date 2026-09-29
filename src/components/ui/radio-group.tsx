@@ -18,15 +18,15 @@ const RadioPill = React.forwardRef<
   <RadioGroupPrimitive.Item
     ref={ref}
     className={cn(
-      'inline-flex items-center gap-[7px] rounded-full border border-rule-strong bg-sheet-2 px-3.5 py-1.5 text-[11.5px] font-semibold',
-      'transition-colors hover:border-navy-3 data-[state=checked]:border-navy-3 data-[state=checked]:bg-navy-3/10',
+      'inline-flex items-center gap-2 rounded-full border border-rule-strong bg-sheet px-3.5 py-1.5 text-[13px] font-medium',
+      'transition-colors hover:border-accent data-[state=checked]:border-accent data-[state=checked]:bg-accent/[.08]',
       'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
       className,
     )}
     {...props}
   >
     <span className="grid size-3.5 place-content-center rounded-full border border-rule-strong bg-sheet">
-      <RadioGroupPrimitive.Indicator className="size-2 rounded-full bg-navy-3" />
+      <RadioGroupPrimitive.Indicator className="size-2 rounded-full bg-accent" />
     </span>
     {children}
   </RadioGroupPrimitive.Item>

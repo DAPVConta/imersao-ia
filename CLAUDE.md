@@ -17,6 +17,24 @@ Quando um termo técnico for inevitável, explicar o que significa.
 **Conferir antes de afirmar.** Não dizer que algo está no ar sem checar o estado
 do deploy, nem que algo funciona sem ter testado.
 
+## Skills — consultar SEMPRE antes de trabalhar
+
+O projeto traz skills em `.claude/skills/`. **Antes de qualquer tarefa, abrir
+e seguir a skill que cobre o assunto** (pela ferramenta Skill ou lendo o
+`SKILL.md`). Não é opcional:
+
+| Quando | Skill |
+|---|---|
+| Qualquer mudança de tela, componente, cor, fonte, layout ou texto da interface | `frontend-design` (`.claude/skills/frontend-design/SKILL.md`) — e seguir o plano já decidido em `docs/design.md` |
+| Qualquer coisa com Supabase: banco, Auth, Storage, Edge Functions, RLS, supabase-js, erros da API | `supabase` (`.claude/skills/supabase/SKILL.md`) |
+| Criar ou mudar tabela, coluna, índice, política RLS, função, gatilho, migração, ou investigar lentidão | `supabase-postgres-best-practices` (`.claude/skills/supabase-postgres-best-practices/SKILL.md` e os `references/`) |
+
+Depois de mexer no banco, rodar os *advisors* do Supabase (MCP `get_advisors`,
+segurança e desempenho) e corrigir o que aparecer. Origem das skills:
+`anthropics/skills` (frontend-design) e `supabase/agent-skills` (as duas do
+Supabase); para atualizar, copiar de novo a pasta da skill do repositório de
+origem.
+
 ## Stack
 
 | Camada | Tecnologia |
@@ -30,6 +48,9 @@ do deploy, nem que algo funciona sem ter testado.
 
 Versões fixas de propósito: **Tailwind 3** (não 4) e **tailwind-merge 2** (a 3
 é para Tailwind 4 e apaga classes como `outline` sem avisar). React 18.
+Todas as dependências ficam com versão **exata** no `package.json` (`.npmrc`
+com `save-exact=true`) e o `package-lock.json` vai no git — regra da skill
+`supabase` contra ataques de cadeia de dependências.
 
 ## Comandos
 
@@ -49,6 +70,8 @@ npm run preview      # serve o dist/ em http://localhost:4173
 ```
 index.html                 casca HTML (Vite injeta o app aqui)
 public/                    arquivos servidos como estão (favicon.svg)
+docs/design.md             plano de design (paleta, fontes, layout, assinatura)
+.claude/skills/            skills do projeto (ver seção Skills)
 src/
   main.tsx                 liga o React, fontes e CSS
   App.tsx                  cabeçalho + rotas + rodapé; chama iniciar()
@@ -119,27 +142,44 @@ Módulos que existem hoje: `financas` (dados, banco, regras), `painel`
 
 ## Visual (design system)
 
-- Cores **só por token**, nunca hex solto no componente: `bg-sheet`, `text-ink`,
-  `text-ink-mute`, `border-rule`, `bg-credit` (verde/receita), `bg-debit`
-  (vermelho/despesa), `bg-navy-3` (principal), `bg-gold` (destaque). Aceitam
-  opacidade (`bg-credit/10`). Em SVG: `rgb(var(--credit))`.
+**O design está decidido em `docs/design.md` — ler antes de mexer na tela.**
+Resumo: identidade da cédula de real (papel-moeda esverdeado, tinta
+verde-pinho, verde de entrada, carmim de saída, violeta de ação) e a
+assinatura é a *cédula do mês* com guilhochê em SVG
+(`features/painel/components/cedula-do-mes.tsx`, geometria em
+`features/painel/guilloche.ts`).
+
+- Cores **só por token**, nunca hex solto no componente: `bg-paper`, `bg-sheet`,
+  `text-ink`, `text-ink-2`, `text-ink-mute`, `border-rule`, `text-credit-deep`
+  (entrou), `text-debit-deep` (saiu), `bg-accent` (ação/seleção), `bg-gold`
+  (alerta). Aceitam opacidade (`bg-accent/10`). Em SVG: `rgb(var(--credit))`.
 - Os tokens ficam em `src/index.css`, como canais RGB, com versão clara e
   escura. Um token novo precisa entrar **nos três blocos** (claro, escuro
-  forçado e escuro automático) e em `tailwind.config.ts`.
-- Não usar o prefixo `dark:`: o tema troca sozinho pelas variáveis. O tema é
-  auto/claro/escuro, gravado em `localStorage` `fin_theme`, aplicado como
-  `data-theme` no `<html>`.
-- Componente novo do shadcn: copiar de ui.shadcn.com para `src/components/ui/`
-  (o `components.json` já está configurado) e **trocar as cores padrão pelos
-  tokens acima**. Variações (tamanho, cor) com `cva`, como em `button.tsx`.
-- Categorias e suas cores: `features/financas/categorias.ts`.
-- Nada de CDN: fontes (Inter, JetBrains Mono) e pdf.js vêm do npm e são
-  servidos pelo próprio site.
+  forçado e escuro automático) e em `tailwind.config.ts`. Não usar `dark:`.
+- Fontes: **Public Sans** (tudo) e **Bodoni Moda** (`font-cedula`) **só** no
+  valor da cédula e no nome do mês do topo. Valores sempre com a classe `num`
+  (algarismos alinhados).
+- Proibido (vícios de design genérico apontados pela skill): rótulos em
+  CAIXA-ALTA espaçada, "A · B · C", fonte monoespaçada em rótulo, `→` em
+  botão, cartões iguais com sombra em tudo, gradiente decorativo, animação de
+  entrada em cada seção, cartão que "sobe" no hover.
+- Estrutura de página: seções (`Card` = seção com linha no topo, sem caixa) e
+  `Superficie` (papel com borda) só para objetos: a cédula e tabelas.
+- Movimento: só a assinatura anima sozinha (e respeita "reduzir movimento");
+  o resto só responde a clique. Troca de mês usa `irParaMes()` (View
+  Transitions + setas ← → do teclado).
+- Componente novo do shadcn: copiar para `src/components/ui/` (o
+  `components.json` já está configurado), **trocar as cores padrão pelos
+  tokens** e as variações com `cva`, como em `button.tsx`.
+- Categorias e cores: `features/financas/categorias.ts` + `--cat-*` no CSS.
+- Nada de CDN: fontes e pdf.js vêm do npm e são servidos pelo próprio site.
+- Texto da interface: português simples, caixa normal, botão diz o que faz,
+  erro diz o que houve e o que fazer, tela vazia convida a agir.
 
 ## Carimbo de versão
 
 `VERSAO_APP` em `src/lib/versao.ts` aparece no rodapé. **Incrementar sempre
-que houver mudança visível** (`v28/09/2026-a` → `-b`; dia novo → nova data com
+que houver mudança visível** (`v29/09/2026-a` → `-b`; dia novo → nova data com
 `-a`). É como o dono confirma, sem ferramentas de desenvolvedor, que o
 navegador pegou a versão nova e não uma cópia em cache.
 

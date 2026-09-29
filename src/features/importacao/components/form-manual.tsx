@@ -32,7 +32,8 @@ export function FormManual() {
 
   return (
     <form onSubmit={enviar}>
-      <div className="grid grid-cols-2 items-end gap-[11px] min-[901px]:grid-cols-6">
+      <p className="mb-4 max-w-[70ch] text-[13.5px] text-ink-mute">Com data de hoje ou passada, entra no mês daquela data. Com data futura, vai para a agenda.</p>
+      <div className="grid grid-cols-2 items-end gap-3 min-[901px]:grid-cols-[150px_2fr_1fr_1fr_1.3fr_1fr]">
         <div><Label htmlFor="m-data">Data</Label><Input id="m-data" type="date" value={data} onChange={(e) => setData(e.target.value)} /></div>
         <div><Label htmlFor="m-desc">Descrição</Label><Input id="m-desc" placeholder="Ex: Mercado do bairro" value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
         <div><Label htmlFor="m-tipo">Tipo</Label><SeletorTipo id="m-tipo" valor={tipo} aoMudar={setTipo} rotuloTransferencia="Transferência interna" /></div>
@@ -40,7 +41,7 @@ export function FormManual() {
         <div><Label htmlFor="m-cat">Categoria</Label><SeletorCategoria id="m-cat" valor={categoria} aoMudar={setCategoria} /></div>
         <div><Label htmlFor="m-valor">Valor (R$)</Label><Input id="m-valor" type="number" step="0.01" min="0" placeholder="0,00" value={valor} onChange={(e) => setValor(e.target.value)} /></div>
       </div>
-      <div className="mt-2.5"><Button type="submit" variant="default">Adicionar lançamento</Button></div>
+      <div className="mt-4"><Button type="submit" variant="default">Adicionar lançamento</Button></div>
     </form>
   )
 }

@@ -1,16 +1,26 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { ChevronLeft, ChevronRight, Contrast, Download, Plus, Upload } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { criarMes, exportarBackup, importarBackup } from '@/features/financas/acoes'
-import { escolherMes, useFinancas } from '@/features/financas/store'
+import { irParaMes, vizinhos } from '@/features/financas/navegacao'
+import { useFinancas } from '@/features/financas/store'
 import { useTema } from '@/hooks/use-tema'
-import { rotuloMes } from '@/lib/formato'
+import { mesPorExtenso } from '@/lib/formato-mes'
 import { Logo } from './logo'
 
-const ROTULO_TEMA = { auto: '◐ Auto', light: '☀ Claro', dark: '☾ Escuro' } as const
+const ROTULO_TEMA = { auto: 'Tema automático', light: 'Tema claro', dark: 'Tema escuro' } as const
+
+/** Leva ao formulário de lançamento e põe o cursor na descrição. */
+function irParaLancamento() {
+  const campo = document.getElementById('m-desc') as HTMLInputElement | null
+  document.getElementById('trazer-lancamentos')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  document.querySelector<HTMLButtonElement>('[data-aba="manual"]')?.click()
+  setTimeout(() => campo?.focus({ preventScroll: true }), 350)
+}
 
 export function Cabecalho() {
   const meses = useFinancas((e) => e.base.months)
@@ -21,6 +31,21 @@ export function Cabecalho() {
   const [novoMes, setNovoMes] = useState('')
 
   const chaves = Object.keys(meses).sort()
+  const { anterior, proximo } = vizinhos()
+
+  // Setas ← → trocam de mês (fora de campos de texto e de listas abertas).
+  useEffect(() => {
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
+      const alvo = e.target as HTMLElement
+      if (alvo.closest('input, textarea, select, [role="listbox"], [role="dialog"], [role="tablist"]')) return
+      const v = vizinhos()
+      if (e.key === 'ArrowLeft' && v.anterior) irParaMes(v.anterior)
+      if (e.key === 'ArrowRight' && v.proximo) irParaMes(v.proximo)
+    }
+    window.addEventListener('keydown', aoTeclar)
+    return () => window.removeEventListener('keydown', aoTeclar)
+  }, [])
 
   const confirmarNovoMes = (e: FormEvent) => {
     e.preventDefault()
@@ -31,48 +56,48 @@ export function Cabecalho() {
   }
 
   return (
-    <header className="relative z-[2]">
-      <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 px-[22px] pb-2 pt-5">
-        <div className="flex items-center gap-[13px]">
-          <Logo className="size-[46px] flex-none drop-shadow-[0_6px_14px_rgba(0,0,0,.45)]" />
-          <div>
-            <h1 className="m-0 text-lg font-extrabold tracking-[-.01em] text-on-navy">Assistente Financeiro</h1>
-            <div className="mt-[3px] text-[10.5px] font-bold uppercase tracking-[.14em] text-on-navy-2">
-              Dashboard mensal · importações salvas no banco de dados
-            </div>
-          </div>
-        </div>
+    <header className="sticky top-0 z-30 border-b border-rule bg-paper/90 backdrop-blur">
+      <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
+        <a href="/" className="flex items-center gap-2.5 rounded-sm">
+          <Logo className="size-8 flex-none" />
+          <span className="text-[15px] font-semibold tracking-[-.01em]">Assistente Financeiro</span>
+        </a>
 
-        <div className="flex flex-wrap items-center gap-[9px]">
-          <Select value={mesAtual ?? undefined} onValueChange={escolherMes}>
-            <SelectTrigger variant="glass" className="w-auto min-w-[128px]" aria-label="Mês">
-              <SelectValue placeholder="Mês" />
+        <nav aria-label="Mês" className="order-3 flex w-full items-center gap-1 sm:order-none sm:w-auto">
+          <Button variant="ghost" size="icon" disabled={!anterior} onClick={() => irParaMes(anterior)} aria-label="Mês anterior" title="Mês anterior (←)">
+            <ChevronLeft />
+          </Button>
+          <Select value={mesAtual ?? undefined} onValueChange={irParaMes}>
+            <SelectTrigger variant="titulo" className="w-auto" aria-label="Mês">
+              <SelectValue placeholder="Escolha o mês">{mesAtual && mesPorExtenso(mesAtual)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {chaves.map((k) => (
-                <SelectItem key={k} value={k}>
-                  {rotuloMes(k)}
-                </SelectItem>
-              ))}
+              {chaves.map((k) => <SelectItem key={k} value={k}>{mesPorExtenso(k)}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button variant="glass" onClick={() => setNovoMesAberto(true)}>
-            + Novo mês
+          <Button variant="ghost" size="icon" disabled={!proximo} onClick={() => irParaMes(proximo)} aria-label="Próximo mês" title="Próximo mês (→)">
+            <ChevronRight />
           </Button>
-          <Button variant="glass-ghost" onClick={exportarBackup}>
-            Exportar backup
+          <Button variant="ghost" size="sm" onClick={() => setNovoMesAberto(true)} className="ml-1 text-ink-mute">
+            Novo mês
           </Button>
-          <Button variant="glass-ghost" onClick={() => arquivo.current?.click()}>
-            Importar backup
+        </nav>
+
+        <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={exportarBackup} aria-label="Exportar backup" title="Exportar backup (arquivo JSON)">
+            <Download />
           </Button>
-          <Button variant="glass-ghost" onClick={alternar} title="Alternar tema (auto → claro → escuro)" aria-label="Alternar tema">
-            {ROTULO_TEMA[tema]}
+          <Button variant="ghost" size="icon" onClick={() => arquivo.current?.click()} aria-label="Importar backup" title="Importar backup">
+            <Upload />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={alternar} aria-label={`${ROTULO_TEMA[tema]} — trocar`} title={`${ROTULO_TEMA[tema]} (clique para trocar)`}>
+            <Contrast />
+          </Button>
+          <Button variant="default" onClick={irParaLancamento} className="ml-2">
+            <Plus /> Lançar
           </Button>
           <input
-            ref={arquivo}
-            type="file"
-            accept="application/json"
-            className="hidden"
+            ref={arquivo} type="file" accept="application/json" className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0]
               if (f) void importarBackup(f)
@@ -92,12 +117,8 @@ export function Cabecalho() {
               <Input id="novo-mes" type="month" placeholder="AAAA-MM" required value={novoMes} onChange={(e) => setNovoMes(e.target.value)} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setNovoMesAberto(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" variant="default">
-                Criar mês
-              </Button>
+              <Button type="button" variant="ghost" onClick={() => setNovoMesAberto(false)}>Cancelar</Button>
+              <Button type="submit" variant="default">Criar mês</Button>
             </DialogFooter>
           </form>
         </DialogContent>

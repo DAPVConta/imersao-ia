@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Superficie } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { confirmarImportacao, type Complemento } from '@/features/financas/acoes'
 import { detectarMes } from '@/features/financas/calculos'
@@ -34,7 +35,7 @@ export function PreVisualizacao({
   const mudar = (i: number, parte: Partial<LancamentoNovo>) =>
     setLinhas((ls) => ls.map((l, j) => (j === i ? { ...l, ...parte } : l)))
 
-  if (!linhas.length) return <p className="text-[11.5px] text-ink-mute">Nenhum lançamento reconhecido.</p>
+  if (!linhas.length) return <p className="text-[13.5px] text-ink-mute">Nenhum lançamento reconhecido.</p>
 
   const confirmar = async () => {
     setSalvando(true)
@@ -45,29 +46,29 @@ export function PreVisualizacao({
   return (
     <div>
       <div className="mb-1.5 mt-3.5 flex flex-wrap items-center gap-[9px]">
-        <Label htmlFor="mes-destino" className="mb-0 text-[11.5px] normal-case tracking-normal text-ink-2">
-          <strong>Importar no mês:</strong>
+        <Label htmlFor="mes-destino" className="mb-0 text-[14px] font-semibold text-ink">
+          Importar em
         </Label>
         <Select value={destino} onValueChange={setDestino}>
           <SelectTrigger id="mes-destino" className="w-auto min-w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             {opcoesMes.map((k) => (
-              <SelectItem key={k} value={k}>{rotuloMes(k)}{meses[k] ? '' : ' — novo'}</SelectItem>
+              <SelectItem key={k} value={k}>{rotuloMes(k)}{meses[k] ? '' : ' (novo)'}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         {!meses[destino] && (
-          <span className="inline-flex items-center rounded-full border border-rule-strong bg-sheet-2 px-3.5 py-1.5 text-[11.5px] font-semibold">
-            ✨ mês novo — será criado
+          <span className="text-[13.5px] text-accent">
+            Mês novo: será criado ao confirmar
           </span>
         )}
       </div>
       {periodo.length > 1 && (
-        <p className="text-[11.5px] text-ink-mute">
+        <p className="text-[13.5px] text-ink-mute">
           Os lançamentos vão de {rotuloMes(periodo[0])} a {rotuloMes(periodo[periodo.length - 1])} — todos entram no mês escolhido acima.
         </p>
       )}
-      <div className="mt-2.5">
+      <Superficie className="mt-3 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -100,12 +101,12 @@ export function PreVisualizacao({
             ))}
           </TableBody>
         </Table>
-      </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-[9px]">
+      </Superficie>
+      <div className="mt-4 flex flex-wrap items-center gap-[9px]">
         <Button variant="default" onClick={confirmar} disabled={salvando || !destino}>
           {salvando ? 'Salvando no banco...' : 'Confirmar importação'}
         </Button>
-        <span className="text-[11.5px] text-ink-mute">Os itens desmarcados não serão importados.</span>
+        <span className="text-[13.5px] text-ink-mute">Os itens desmarcados não serão importados.</span>
       </div>
     </div>
   )

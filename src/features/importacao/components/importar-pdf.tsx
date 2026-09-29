@@ -54,11 +54,11 @@ export function ImportarPdf() {
 
   return (
     <div>
-      <p className="mb-2.5 text-[11.5px] text-ink-mute">
+      <p className="mb-4 max-w-[70ch] text-[13.5px] text-ink-mute">
         Funciona melhor com extratos/faturas no mesmo modelo dos documentos de exemplo (Banco Horizonte / Cartão Horizonte). Para outros
         bancos, revise a pré-visualização antes de confirmar — nada é importado sem sua confirmação.
       </p>
-      <RadioGroup value={tipo} onValueChange={(v) => setTipo(v as 'bank' | 'card')} className="mb-2.5" aria-label="Tipo de documento">
+      <RadioGroup value={tipo} onValueChange={(v) => setTipo(v as 'bank' | 'card')} className="mb-4" aria-label="Tipo de documento">
         <RadioPill value="bank">Extrato bancário</RadioPill>
         <RadioPill value="card">Fatura de cartão</RadioPill>
       </RadioGroup>
@@ -74,14 +74,14 @@ export function ImportarPdf() {
           if (f) void ler(f)
         }}
         className={cn(
-          'w-full rounded-[14px] border-[1.5px] border-dashed border-rule-strong bg-sheet-2 px-4 py-[34px] text-center text-ink-2',
-          'transition-[border-color,background-color,transform] duration-150 hover:scale-[1.004] hover:border-navy-3 hover:stripe',
+          'w-full rounded-lg border-[1.5px] border-dashed border-rule-strong bg-sheet px-4 py-9 text-center text-ink-2',
+          'transition-colors hover:border-accent hover:bg-accent/[.04]',
           'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-          arrastando && 'border-gold stripe',
+          arrastando && 'border-accent bg-accent/[.06]',
         )}
       >
-        <div className="inline-flex items-center gap-2 font-semibold"><FileText className="size-4" /> Clique ou arraste o PDF aqui</div>
-        <div className="mt-1.5 text-[11.5px] text-ink-mute">O arquivo é lido inteiramente no seu navegador.</div>
+        <div className="inline-flex items-center gap-2 text-[15px] font-medium text-ink"><FileText className="size-5 text-accent" /> Escolha o PDF ou arraste para cá</div>
+        <div className="mt-1.5 text-[13.5px] text-ink-mute">O arquivo é lido aqui mesmo no seu navegador e não é enviado para lugar nenhum.</div>
       </button>
       <input
         ref={arquivo} type="file" accept="application/pdf" className="hidden"
@@ -91,7 +91,7 @@ export function ImportarPdf() {
           e.target.value = ''
         }}
       />
-      {situacao && <div className="mt-2 text-[11.5px] text-ink-mute">{situacao}</div>}
+      {situacao && <div className="mt-2 text-[13.5px] text-ink-mute">{situacao}</div>}
       {textoBruto != null && <Textarea readOnly rows={8} value={textoBruto} className="mt-2" />}
       {previa && (
         <PreVisualizacao

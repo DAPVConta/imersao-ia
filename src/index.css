@@ -3,137 +3,99 @@
 @tailwind utilities;
 
 /*
-  Tokens de cor do painel. Cores usadas pelo Tailwind ficam como canais RGB
-  ("15 24 38") para aceitar opacidade; as de categoria e da faixa do topo
-  ficam em hex porque só aparecem em var() direto.
+  Tokens de cor — identidade "cédula de real" (ver docs/design.md).
+  Cores usadas pelo Tailwind ficam como canais RGB ("23 48 43") para aceitar
+  opacidade (bg-credit/10). As de categoria ficam em hex (só usadas via var()).
 
-  Tema: sem data-theme = automático (segue o sistema); data-theme="light"
-  ou "dark" força. O bloco escuro aparece duas vezes de propósito — uma para
-  o modo forçado, outra para o automático.
+  Tema: sem data-theme = automático (segue o sistema); data-theme="light" ou
+  "dark" força. O bloco escuro aparece duas vezes de propósito — uma para o
+  modo forçado, outra para o automático.
 */
 @layer base {
   :root {
     color-scheme: light;
-    --band-a: #0a1e3a; --band-b: #10315c; --band-c: #17497c;
-    --navy: 18 58 102; --navy-2: 12 39 71; --navy-3: 27 80 140;
-    --on-navy: 255 255 255; --on-navy-2: 169 192 218;
-    --paper: 243 245 249; --paper-2: 233 237 244;
-    --sheet: 255 255 255; --sheet-2: 246 248 251;
-    --glass: rgba(255, 255, 255, .9); --glass-border: rgba(255, 255, 255, .6);
-    --ink: 15 24 38; --ink-2: 70 83 107; --ink-mute: 133 146 168;
-    --rule: 230 234 241; --rule-strong: 207 215 227;
-    --hairline: rgba(15, 24, 38, .08);
-    --credit: 14 164 114; --credit-deep: 6 122 82;
-    --debit: 214 59 86; --debit-deep: 161 29 63;
-    --gold: 240 180 41; --gold-deep: 217 142 11; --gold-ink: 35 24 3;
-    --stripe: rgba(18, 58, 102, .035);
-    --shadow-sm: 0 1px 2px rgba(15,24,38,.06), 0 4px 12px -6px rgba(15,24,38,.1);
-    --shadow: 0 1px 2px rgba(15,24,38,.05), 0 10px 24px -12px rgba(15,24,38,.18), 0 24px 48px -24px rgba(15,24,38,.16);
-    --shadow-lift: 0 2px 4px rgba(15,24,38,.06), 0 16px 32px -12px rgba(15,24,38,.22), 0 32px 64px -28px rgba(15,24,38,.2);
-    --cat-moradia: #3b6fd4; --cat-alimentacao: #e0762e; --cat-mercado: #0ea472;
-    --cat-transporte: #e3a51a; --cat-saude: #dd5487; --cat-assinaturas: #18a8a1;
-    --cat-lazer: #7d5bdd; --cat-educacao: #d63b56; --cat-outros: #8592a8;
+    --paper: 232 236 230; --paper-2: 222 227 220;
+    --sheet: 248 249 245; --sheet-2: 239 242 236;
+    --ink: 23 48 43; --ink-2: 62 85 80; --ink-mute: 95 114 108;
+    --rule: 211 218 209; --rule-strong: 181 192 180;
+    --credit: 30 122 85; --credit-deep: 21 92 64;
+    --debit: 163 50 74; --debit-deep: 130 35 58;
+    --accent: 94 79 162; --accent-deep: 70 58 128; --on-accent: 255 255 255;
+    --gold: 156 122 43;
+    --shadow-note: 0 1px 0 rgba(23,48,43,.05), 0 18px 40px -24px rgba(23,48,43,.35);
+    --cat-moradia: #2f6e8f; --cat-alimentacao: #c7772a; --cat-mercado: #3f8a4f;
+    --cat-transporte: #a88a2e; --cat-saude: #9a4f8c; --cat-assinaturas: #3f8e8a;
+    --cat-lazer: #6b5ab0; --cat-educacao: #b0473e; --cat-outros: #7c8a85;
   }
 
   :root[data-theme='dark'] {
     color-scheme: dark;
-    --band-a: #050e1c; --band-b: #0a1f3a; --band-c: #0f3055;
-    --navy: 18 54 94; --navy-2: 10 31 58; --navy-3: 28 79 135;
-    --on-navy: 242 246 251; --on-navy-2: 143 171 201;
-    --paper: 11 15 22; --paper-2: 17 23 35;
-    --sheet: 20 26 38; --sheet-2: 26 34 49;
-    --glass: rgba(20, 26, 38, .86); --glass-border: rgba(255, 255, 255, .09);
-    --ink: 237 241 247; --ink-2: 179 191 210; --ink-mute: 117 130 154;
-    --rule: 33 42 58; --rule-strong: 50 64 90;
-    --hairline: rgba(237, 241, 247, .09);
-    --credit: 34 189 136; --credit-deep: 20 154 107;
-    --debit: 234 95 119; --debit-deep: 204 63 93;
-    --gold: 234 181 62; --gold-deep: 207 147 22; --gold-ink: 30 21 2;
-    --stripe: rgba(143, 171, 201, .045);
-    --shadow-sm: 0 1px 2px rgba(0,0,0,.35), 0 4px 12px -6px rgba(0,0,0,.4);
-    --shadow: 0 1px 0 rgba(0,0,0,.35), 0 12px 28px -14px rgba(0,0,0,.6), 0 28px 56px -28px rgba(0,0,0,.55);
-    --shadow-lift: 0 2px 4px rgba(0,0,0,.4), 0 18px 36px -14px rgba(0,0,0,.65), 0 36px 72px -30px rgba(0,0,0,.6);
-    --cat-moradia: #6f9ce8; --cat-alimentacao: #eb9354; --cat-mercado: #31c795;
-    --cat-transporte: #ecc04f; --cat-saude: #ea7fa7; --cat-assinaturas: #3fc0b9;
-    --cat-lazer: #a58ceb; --cat-educacao: #ea5f77; --cat-outros: #75829a;
+    --paper: 14 26 24; --paper-2: 19 34 31;
+    --sheet: 21 36 31; --sheet-2: 27 45 40;
+    --ink: 228 235 227; --ink-2: 179 194 188; --ink-mute: 138 156 150;
+    --rule: 36 55 47; --rule-strong: 52 73 63;
+    --credit: 79 191 140; --credit-deep: 125 214 173;
+    --debit: 224 112 138; --debit-deep: 238 154 174;
+    --accent: 165 151 232; --accent-deep: 195 184 242; --on-accent: 20 16 42;
+    --gold: 214 178 94;
+    --shadow-note: 0 1px 0 rgba(0,0,0,.4), 0 24px 48px -28px rgba(0,0,0,.8);
+    --cat-moradia: #6fa8c7; --cat-alimentacao: #e09a55; --cat-mercado: #6fbf7f;
+    --cat-transporte: #cdb25a; --cat-saude: #c883b9; --cat-assinaturas: #6fbeb9;
+    --cat-lazer: #a597e8; --cat-educacao: #de7d74; --cat-outros: #9aa9a3;
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
       color-scheme: dark;
-      --band-a: #050e1c; --band-b: #0a1f3a; --band-c: #0f3055;
-      --navy: 18 54 94; --navy-2: 10 31 58; --navy-3: 28 79 135;
-      --on-navy: 242 246 251; --on-navy-2: 143 171 201;
-      --paper: 11 15 22; --paper-2: 17 23 35;
-      --sheet: 20 26 38; --sheet-2: 26 34 49;
-      --glass: rgba(20, 26, 38, .86); --glass-border: rgba(255, 255, 255, .09);
-      --ink: 237 241 247; --ink-2: 179 191 210; --ink-mute: 117 130 154;
-      --rule: 33 42 58; --rule-strong: 50 64 90;
-      --hairline: rgba(237, 241, 247, .09);
-      --credit: 34 189 136; --credit-deep: 20 154 107;
-      --debit: 234 95 119; --debit-deep: 204 63 93;
-      --gold: 234 181 62; --gold-deep: 207 147 22; --gold-ink: 30 21 2;
-      --stripe: rgba(143, 171, 201, .045);
-      --shadow-sm: 0 1px 2px rgba(0,0,0,.35), 0 4px 12px -6px rgba(0,0,0,.4);
-      --shadow: 0 1px 0 rgba(0,0,0,.35), 0 12px 28px -14px rgba(0,0,0,.6), 0 28px 56px -28px rgba(0,0,0,.55);
-      --shadow-lift: 0 2px 4px rgba(0,0,0,.4), 0 18px 36px -14px rgba(0,0,0,.65), 0 36px 72px -30px rgba(0,0,0,.6);
-      --cat-moradia: #6f9ce8; --cat-alimentacao: #eb9354; --cat-mercado: #31c795;
-      --cat-transporte: #ecc04f; --cat-saude: #ea7fa7; --cat-assinaturas: #3fc0b9;
-      --cat-lazer: #a58ceb; --cat-educacao: #ea5f77; --cat-outros: #75829a;
+      --paper: 14 26 24; --paper-2: 19 34 31;
+      --sheet: 21 36 31; --sheet-2: 27 45 40;
+      --ink: 228 235 227; --ink-2: 179 194 188; --ink-mute: 138 156 150;
+      --rule: 36 55 47; --rule-strong: 52 73 63;
+      --credit: 79 191 140; --credit-deep: 125 214 173;
+      --debit: 224 112 138; --debit-deep: 238 154 174;
+      --accent: 165 151 232; --accent-deep: 195 184 242; --on-accent: 20 16 42;
+      --gold: 214 178 94;
+      --shadow-note: 0 1px 0 rgba(0,0,0,.4), 0 24px 48px -28px rgba(0,0,0,.8);
+      --cat-moradia: #6fa8c7; --cat-alimentacao: #e09a55; --cat-mercado: #6fbf7f;
+      --cat-transporte: #cdb25a; --cat-saude: #c883b9; --cat-assinaturas: #6fbeb9;
+      --cat-lazer: #a597e8; --cat-educacao: #de7d74; --cat-outros: #9aa9a3;
     }
   }
 
   * { @apply border-border; }
   html { scroll-behavior: smooth; }
   body {
-    @apply relative min-h-screen bg-background font-sans text-foreground antialiased;
+    @apply min-h-screen bg-background font-sans text-foreground antialiased;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.55;
+    font-feature-settings: 'tnum' 0;
   }
-  /* Faixa azul-marinho atrás do topo, com o brilho dourado/verde. */
-  body::before {
-    content: '';
-    position: absolute; inset: 0 0 auto 0; height: 400px; z-index: 0;
-    background:
-      radial-gradient(560px 300px at 82% -40px, rgba(240,180,41,.18), transparent 65%),
-      radial-gradient(700px 380px at 12% -80px, rgba(14,164,114,.14), transparent 60%),
-      linear-gradient(135deg, var(--band-a) 0%, var(--band-b) 52%, var(--band-c) 100%);
-  }
-  body::after {
-    content: '';
-    position: absolute; top: 398px; left: 0; right: 0; height: 2px; z-index: 0;
-    background: linear-gradient(90deg, transparent, rgba(240,180,41,.4), transparent);
-  }
-  ::selection { background: rgb(var(--gold)); color: rgb(var(--gold-ink)); }
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-thumb { background: rgb(var(--rule-strong)); border-radius: 99px; border: 2px solid rgb(var(--paper)); }
-  ::-webkit-scrollbar-track { background: transparent; }
-  code { @apply rounded-[6px] bg-paper-2 px-[7px] py-[2px] font-mono text-[11.5px] font-semibold; }
+  ::selection { background: rgb(var(--accent) / .25); }
+  :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+  code { @apply rounded-[4px] bg-paper-2 px-1.5 py-px text-[12.5px] font-semibold; }
+  h1, h2, h3 { text-wrap: balance; }
 }
 
 @layer components {
-  /* Vidro fosco usado nos cartões que ficam sobre a faixa do topo. */
-  .glass {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(14px);
-  }
-  .hairline { border: 1px solid var(--hairline); }
-  .stripe { background: var(--stripe); }
   .num { font-variant-numeric: tabular-nums; }
-
-  /* Rótulos dentro dos gráficos SVG */
-  .svg-lbl { fill: rgb(var(--ink-mute)); font-size: 8.5px; font-weight: 600; }
-  .svg-valor {
-    fill: rgb(var(--ink-2)); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
-    paint-order: stroke; stroke: rgb(var(--sheet)); stroke-width: 3.5px; stroke-linejoin: round;
-  }
-  .svg-mes { fill: rgb(var(--ink-mute)); font-size: 10.5px; font-weight: 600; }
-  .svg-media { fill: rgb(var(--ink-mute)); font-size: 9.5px; font-weight: 700; letter-spacing: .04em; }
-  .svg-atual { fill: rgb(var(--ink)); }
+  /* Rótulos dentro de gráficos SVG */
+  .svg-lbl { fill: rgb(var(--ink-mute)); font-size: 11px; font-weight: 500; }
 }
+
+/* Troca de mês com View Transitions: só um cruzamento curto do conteúdo. */
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: .22s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
   html { scroll-behavior: auto; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* Assinatura: as linhas do guilhochê se "gravam" ao abrir e ao trocar de mês. */
+@keyframes gravar { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.gravar { stroke-dasharray: 1; stroke-dashoffset: 1; animation: gravar 1.6s cubic-bezier(.45,.05,.25,1) forwards; }
+@media (prefers-reduced-motion: reduce) { .gravar { stroke-dashoffset: 0; animation: none; } }
+@keyframes encher-anel { from { stroke-dasharray: 0 1; } }
+.anel-poupanca { animation: encher-anel 1.2s .5s cubic-bezier(.45,.05,.25,1) both; }
+@media (prefers-reduced-motion: reduce) { .anel-poupanca { animation: none; } }

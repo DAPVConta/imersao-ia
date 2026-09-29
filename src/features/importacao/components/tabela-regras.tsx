@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Superficie } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { excluirRegra, mudarCategoriaDaRegra } from '@/features/financas/acoes'
 import { SeletorCategoria } from '@/features/financas/components/seletores'
@@ -13,10 +14,11 @@ export function TabelaRegras() {
   ]
   return (
     <div>
-      <p className="mb-2 text-[11.5px] text-ink-mute">
+      <p className="mb-4 max-w-[70ch] text-[13.5px] text-ink-mute">
         Regras usadas para classificar lançamentos automaticamente ao importar. O CNPJ/CPF do favorecido (extrato) e o MCC (fatura) são a
         chave estável — o nome do estabelecimento muda, esses códigos não.
       </p>
+      <Superficie className="overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -32,12 +34,12 @@ export function TabelaRegras() {
             const especial = r.cat === '__bank__'
             return (
               <TableRow key={grupo + chave}>
-                <TableCell className="font-mono text-[11.5px]">{chave}</TableCell>
+                <TableCell className="num whitespace-nowrap">{chave}</TableCell>
                 <TableCell>{tipo}</TableCell>
                 <TableCell>{r.label}</TableCell>
                 <TableCell className="min-w-[170px]">
                   {especial ? (
-                    <span className="text-[11.5px] text-ink-mute">regra especial (banco)</span>
+                    <span className="text-[13.5px] text-ink-mute">regra especial (banco)</span>
                   ) : (
                     <SeletorCategoria tamanho="sm" valor={r.cat} aoMudar={(c) => mudarCategoriaDaRegra(grupo, chave, c)} />
                   )}
@@ -54,6 +56,7 @@ export function TabelaRegras() {
           })}
         </TableBody>
       </Table>
+      </Superficie>
     </div>
   )
 }

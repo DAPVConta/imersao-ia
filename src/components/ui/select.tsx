@@ -14,14 +14,13 @@ const triggerVariants = cva(
   {
     variants: {
       variant: {
-        default: 'w-full border-input bg-sheet text-ink hover:border-ink-mute [&>svg]:text-ink-mute',
-        /** Seletor de mês sobre a faixa escura do topo. */
-        glass:
-          'rounded-[11px] border-white/[.22] bg-white/[.12] font-bold text-on-navy backdrop-blur-md hover:bg-white/[.18] [&>svg]:text-gold',
+        default: 'w-full border-rule-strong bg-sheet text-ink hover:border-ink-mute [&>svg]:text-ink-mute',
+        /** Seletor sem caixa, para o nome do mês no topo. */
+        titulo: 'h-auto border-transparent bg-transparent px-1 font-cedula text-[22px] font-medium text-ink hover:bg-paper-2 [&>svg]:text-ink-mute',
       },
       size: {
-        default: 'h-[38px] px-3 text-sm',
-        sm: 'h-8 px-2.5 text-xs',
+        default: 'h-9 px-3 text-[14px]',
+        sm: 'h-8 px-2.5 text-[13px]',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },
@@ -50,7 +49,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       position={position}
       className={cn(
-        'relative z-50 max-h-[min(var(--radix-select-content-available-height),340px)] min-w-[8rem] overflow-hidden rounded-md border border-rule bg-popover text-popover-foreground shadow-lift',
+        'relative z-50 max-h-[min(var(--radix-select-content-available-height),340px)] min-w-[8rem] overflow-hidden rounded-md border border-rule bg-popover text-popover-foreground shadow-nota',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
         position === 'popper' && 'w-full min-w-[var(--radix-select-trigger-width)] translate-y-1',
         className,
@@ -71,14 +70,14 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex w-full cursor-default select-none items-center rounded-[8px] py-1.5 pl-2 pr-8 text-[13px] outline-none',
-      'focus:bg-paper-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'focus:bg-paper-2 data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}
   >
     <span className="absolute right-2 flex size-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="size-4 text-credit" />
+        <Check className="size-4 text-accent" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

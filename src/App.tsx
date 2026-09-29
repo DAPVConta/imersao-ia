@@ -18,7 +18,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Cabecalho />
-      <main className="relative z-[1] mx-auto max-w-[1240px] px-[22px] pb-[100px] pt-5">
+      <main className="mx-auto max-w-[1180px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
         <FaixaAviso />
         <Paginas />
         <Rodape />

@@ -10,24 +10,23 @@ import { CategoriaTag } from '@/features/financas/components/categoria-tag'
 import type { Agendamento } from '@/features/financas/tipos'
 import { chaveDoMes, dataIso, diasAte, textoPrazo } from '@/lib/datas'
 import { fmtBRL, mesAbreviado, rotuloMes } from '@/lib/formato'
+import { mesPorExtenso } from '@/lib/formato-mes'
 import { cn } from '@/lib/utils'
 import { filtrarAgenda, ordenarAgenda, resumirAgenda, type FiltroAgenda } from '../resumo'
 
 function Numero({ rotulo, valor, rodape, tom }: { rotulo: string; valor: ReactNode; rodape: ReactNode; tom?: 'bom' | 'ruim' }) {
   return (
-    <div className="hairline flex min-w-[150px] flex-col gap-[3px] rounded-md bg-sheet-2 px-[15px] py-[9px]">
-      <div className="text-[9.5px] font-extrabold uppercase tracking-[.12em] text-ink-mute">{rotulo}</div>
-      <div className={cn('num text-[17px] font-extrabold tracking-[-.01em]', tom === 'bom' && 'text-credit-deep', tom === 'ruim' && 'text-debit-deep')}>
-        {valor}
-      </div>
-      <div className="text-[10.5px] text-ink-mute">{rodape}</div>
+    <div className="min-w-[140px]">
+      <dt className="text-[13px] text-ink-mute">{rotulo}</dt>
+      <dd className={cn('num text-[20px] font-semibold', tom === 'bom' && 'text-credit-deep', tom === 'ruim' && 'text-debit-deep')}>{valor}</dd>
+      <dd className="text-[12.5px] text-ink-mute">{rodape}</dd>
     </div>
   )
 }
 
 const corValor = { despesa: 'text-debit-deep', receita: 'text-credit-deep', transferencia: 'text-ink-mute' }
 const sinal = { despesa: '-', receita: '+', transferencia: '' }
-const corPrazo = { venceu: 'text-debit-deep', perto: 'text-gold-deep', normal: 'text-ink-mute' }
+const corPrazo = { venceu: 'text-debit-deep font-semibold', perto: 'text-gold font-semibold', normal: 'text-ink-mute' }
 
 function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) => void }) {
   const [confirmando, setConfirmando] = useState(false)
@@ -37,25 +36,25 @@ function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) =>
   return (
     <div
       className={cn(
-        'hairline mb-[7px] grid items-center gap-x-[13px] gap-y-[9px] rounded-md bg-sheet px-3.5 py-2.5 transition-[border-color,transform] duration-150 hover:-translate-y-px hover:border-navy-3',
+        'grid items-center gap-x-4 gap-y-2 border-b border-rule px-1 py-3 last:border-0',
         'grid-cols-[52px_1fr] [grid-template-areas:"dia_desc""valor_acoes"] min-[701px]:grid-cols-[58px_1fr_auto_auto] min-[701px]:[grid-template-areas:"dia_desc_valor_acoes"]',
-        dias < 0 && 'border-debit bg-debit/[.055]',
+        dias < 0 && 'relative before:absolute before:inset-y-2 before:-left-3 before:w-[3px] before:rounded-full before:bg-debit',
       )}
     >
       <div className="text-center leading-[1.15] [grid-area:dia]">
-        <div className="num text-lg font-extrabold">{iso.slice(8, 10)}</div>
-        <div className="text-[9.5px] font-extrabold uppercase tracking-[.08em] text-ink-mute">{mesAbreviado(iso)}</div>
+        <div className="num text-[22px] font-semibold leading-none">{iso.slice(8, 10)}</div>
+        <div className="text-[12px] text-ink-mute">{mesAbreviado(iso)}</div>
       </div>
       <div className="min-w-0 [grid-area:desc]">
-        <div className="truncate text-[13px] font-bold" title={a.desc}>{a.desc}</div>
-        <div className="mt-[3px] flex flex-wrap items-center gap-[11px]">
+        <div className="truncate text-[14.5px] font-medium" title={a.desc}>{a.desc}</div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
           <CategoriaTag nome={a.category} />
-          <span className="text-[11.5px] text-ink-mute">{ROTULO_ORIGEM[a.source]}</span>
-          <span className={cn('text-[10.5px] font-bold', corPrazo[prazo.tom])}>{prazo.texto}</span>
+          <span className="text-[13px] text-ink-mute">{ROTULO_ORIGEM[a.source]}</span>
+          <span className={cn('text-[13px]', corPrazo[prazo.tom])}>{prazo.texto}</span>
         </div>
       </div>
-      <div className={cn('num whitespace-nowrap text-left text-sm font-extrabold [grid-area:valor] min-[701px]:text-right', corValor[a.type])}>
-        {sinal[a.type]}{fmtBRL(a.value)}
+      <div className={cn('num whitespace-nowrap text-left text-[16px] font-semibold [grid-area:valor] min-[701px]:text-right', corValor[a.type])}>
+        {sinal[a.type] && <span aria-hidden="true">{sinal[a.type] === '-' ? '−' : '+'}</span>}{fmtBRL(a.value)}
       </div>
       <div className="flex justify-end gap-1.5 [grid-area:acoes]">
         <Button
@@ -64,7 +63,7 @@ function Item({ a, aoRemover }: { a: Agendamento; aoRemover: (a: Agendamento) =>
         >
           <Check /> {confirmando ? 'Confirmando...' : 'Aconteceu'}
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" title="Remover da agenda" aria-label={`Remover ${a.desc} da agenda`} onClick={() => aoRemover(a)}>
+        <Button variant="ghost" size="icon" className="text-ink-mute" title="Remover da agenda" aria-label={`Remover ${a.desc} da agenda`} onClick={() => aoRemover(a)}>
           <X />
         </Button>
       </div>
@@ -86,9 +85,9 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
 
   return (
     <Card>
-      <CardTitle dica="o que ainda não aconteceu: todo lançamento com data futura entra aqui">Agenda</CardTitle>
+      <CardTitle dica="O que ainda não aconteceu. Lançamentos com data futura esperam aqui e só entram no mês quando você confirma.">Agenda</CardTitle>
 
-      <div className="mb-[15px] flex flex-wrap gap-2.5">
+      <dl className="mb-6 flex flex-wrap gap-x-10 gap-y-4">
         <Numero rotulo="A pagar" valor={fmtBRL(resumo.aPagar30)} rodape="nos próximos 30 dias" tom="ruim" />
         <Numero rotulo="A receber" valor={fmtBRL(resumo.aReceber30)} rodape="nos próximos 30 dias" tom="bom" />
         <Numero
@@ -99,9 +98,9 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
           rotulo="Resultado previsto" valor={fmtBRL(resumo.saldoPrevisto)} tom={resumo.saldoPrevisto < 0 ? 'ruim' : 'bom'}
           rodape={mesAtual ? `${rotuloMes(mesAtual)}, já contando a agenda` : '—'}
         />
-      </div>
+      </dl>
 
-      <div className="mb-[15px] flex flex-wrap items-center gap-[9px]">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <Select value={filtro} onValueChange={(v) => setFiltro(v as FiltroAgenda)}>
           <SelectTrigger size="sm" className="w-auto min-w-[190px]" aria-label="Filtro da agenda"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -110,11 +109,11 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
             <SelectItem value="mes">Só do mês selecionado</SelectItem>
           </SelectContent>
         </Select>
-        <span className="ml-auto text-[11.5px] text-ink-mute">{visiveis.length} de {itens.length} previsto(s)</span>
+        <span className="ml-auto text-[13px] text-ink-mute">{visiveis.length} de {itens.length} {itens.length === 1 ? 'previsto' : 'previstos'}</span>
       </div>
 
       {!visiveis.length ? (
-        <div className="py-5 text-center text-[12.5px] text-ink-mute">
+        <div className="py-8 text-center text-[14px] text-ink-mute">
           {itens.length
             ? 'Nada previsto nesse recorte — troque o filtro acima para ver o resto.'
             : 'Nada agendado. Lance algo com data futura em “Lançamento manual” e ele aparece aqui.'}
@@ -126,8 +125,8 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
           return (
             <Fragment key={a.id}>
               {novoMes && (
-                <div className={cn('mb-2 border-b border-rule pb-[5px] text-[10px] font-extrabold uppercase tracking-[.12em] text-ink-mute', i > 0 && 'mt-4')}>
-                  {rotuloMes(chave)}
+                <div className={cn('pb-1 pt-5 text-[14px] font-semibold text-ink-2', i === 0 && 'pt-2')}>
+                  {mesPorExtenso(chave)}
                 </div>
               )}
               <Item a={a} aoRemover={setRemovendo} />
