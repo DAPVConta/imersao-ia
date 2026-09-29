@@ -1,32 +1,22 @@
-import { ChevronLeft, ChevronRight, Contrast, Download, Plus, Upload } from 'lucide-react'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { criarMes, exportarBackup, importarBackup } from '@/features/financas/acoes'
+import { criarMes } from '@/features/financas/acoes'
 import { irParaMes, vizinhos } from '@/features/financas/navegacao'
 import { useFinancas } from '@/features/financas/store'
-import { useTema } from '@/hooks/use-tema'
 import { mesPorExtenso } from '@/lib/formato-mes'
 import { Logo } from './logo'
 
-const ROTULO_TEMA = { auto: 'Tema automático', light: 'Tema claro', dark: 'Tema escuro' } as const
-
-/** Leva ao formulário de lançamento e põe o cursor na descrição. */
-function irParaLancamento() {
-  const campo = document.getElementById('m-desc') as HTMLInputElement | null
-  document.getElementById('trazer-lancamentos')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  document.querySelector<HTMLButtonElement>('[data-aba="manual"]')?.click()
-  setTimeout(() => campo?.focus({ preventScroll: true }), 350)
-}
-
-export function Cabecalho() {
+/** Barra do topo: o mês aberto (vale para todas as páginas) e o botão de lançar. */
+export function BarraTopo() {
   const meses = useFinancas((e) => e.base.months)
   const mesAtual = useFinancas((e) => e.mesAtual)
-  const { tema, alternar } = useTema()
-  const arquivo = useRef<HTMLInputElement>(null)
+  const navegar = useNavigate()
   const [novoMesAberto, setNovoMesAberto] = useState(false)
   const [novoMes, setNovoMes] = useState('')
 
@@ -47,6 +37,15 @@ export function Cabecalho() {
     return () => window.removeEventListener('keydown', aoTeclar)
   }, [])
 
+  /** Leva ao formulário de lançamento e põe o cursor na descrição. */
+  const irParaLancamento = () => {
+    navegar('/importar')
+    setTimeout(() => {
+      document.querySelector<HTMLButtonElement>('[data-aba="manual"]')?.click()
+      document.getElementById('m-desc')?.focus()
+    }, 80)
+  }
+
   const confirmarNovoMes = (e: FormEvent) => {
     e.preventDefault()
     if (criarMes(novoMes)) {
@@ -56,14 +55,11 @@ export function Cabecalho() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-rule bg-paper/90 backdrop-blur">
-      <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <a href="/" className="flex items-center gap-2.5 rounded-sm">
-          <Logo className="size-8 flex-none" />
-          <span className="text-[15px] font-semibold tracking-[-.01em]">Assistente Financeiro</span>
-        </a>
+    <header className="sticky top-0 z-30 border-b border-rule bg-sheet/90 backdrop-blur">
+      <div className="flex items-center gap-2 px-4 py-2 sm:px-6">
+        <Logo className="size-8 flex-none lg:hidden" />
 
-        <nav aria-label="Mês" className="order-3 flex w-full items-center gap-1 sm:order-none sm:w-auto">
+        <nav aria-label="Mês" className="flex items-center gap-0.5">
           <Button variant="ghost" size="icon" disabled={!anterior} onClick={() => irParaMes(anterior)} aria-label="Mês anterior" title="Mês anterior (←)">
             <ChevronLeft />
           </Button>
@@ -78,33 +74,14 @@ export function Cabecalho() {
           <Button variant="ghost" size="icon" disabled={!proximo} onClick={() => irParaMes(proximo)} aria-label="Próximo mês" title="Próximo mês (→)">
             <ChevronRight />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setNovoMesAberto(true)} className="ml-1 text-ink-mute">
+          <Button variant="ghost" size="sm" onClick={() => setNovoMesAberto(true)} className="hidden text-ink-mute sm:inline-flex">
             Novo mês
           </Button>
         </nav>
 
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={exportarBackup} aria-label="Exportar backup" title="Exportar backup (arquivo JSON)">
-            <Download />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => arquivo.current?.click()} aria-label="Importar backup" title="Importar backup">
-            <Upload />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={alternar} aria-label={`${ROTULO_TEMA[tema]} — trocar`} title={`${ROTULO_TEMA[tema]} (clique para trocar)`}>
-            <Contrast />
-          </Button>
-          <Button variant="default" onClick={irParaLancamento} className="ml-2">
-            <Plus /> Lançar
-          </Button>
-          <input
-            ref={arquivo} type="file" accept="application/json" className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) void importarBackup(f)
-              e.target.value = ''
-            }}
-          />
-        </div>
+        <Button variant="default" onClick={irParaLancamento} className="ml-auto">
+          <Plus /> Lançar
+        </Button>
       </div>
 
       <Dialog open={novoMesAberto} onOpenChange={setNovoMesAberto}>

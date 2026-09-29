@@ -16,7 +16,7 @@ const triggerVariants = cva(
       variant: {
         default: 'w-full border-rule-strong bg-sheet text-ink hover:border-ink-mute [&>svg]:text-ink-mute',
         /** Seletor sem caixa, para o nome do mês no topo. */
-        titulo: 'h-auto border-transparent bg-transparent px-1 font-cedula text-[22px] font-medium text-ink hover:bg-paper-2 [&>svg]:text-ink-mute',
+        titulo: 'h-auto border-transparent bg-transparent px-1.5 text-[17px] font-semibold tracking-[-.01em] text-ink hover:bg-paper-2 [&>svg]:text-ink-mute',
       },
       size: {
         default: 'h-9 px-3 text-[14px]',
