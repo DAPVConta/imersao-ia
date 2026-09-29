@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Card, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { carregarDemo } from '@/features/financas/acoes'
 import { FormManual } from './form-manual'
@@ -9,8 +9,7 @@ import { TabelaRegras } from './tabela-regras'
 
 export function PainelImportacao() {
   return (
-    <Card id="trazer-lancamentos" className="scroll-mt-20">
-      <CardTitle dica="Nada entra sem você revisar. Reimportar o mesmo extrato não duplica lançamentos.">Trazer lançamentos</CardTitle>
+    <Card id="trazer-lancamentos">
       <Tabs defaultValue="manual">
         <TabsList>
           <TabsTrigger value="manual" data-aba="manual">Lançar à mão</TabsTrigger>

@@ -34,11 +34,11 @@ export default {
         credit: { DEFAULT: token('credit'), deep: token('credit-deep') },
         debit: { DEFAULT: token('debit'), deep: token('debit-deep') },
         gold: token('gold'),
+        previsto: token('previsto'),
+        menu: { DEFAULT: token('menu'), 2: token('menu-2'), foreground: token('on-menu'), mute: token('on-menu-mute') },
       },
       fontFamily: {
         sans: ['"Public Sans Variable"', '-apple-system', '"Segoe UI"', 'system-ui', 'sans-serif'],
-        /** Só para o valor da cédula e o nome do mês (docs/design.md). */
-        cedula: ['"Bodoni Moda Variable"', '"Bodoni 72"', 'Didot', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: '14px',

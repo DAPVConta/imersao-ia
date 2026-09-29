@@ -1,5 +1,4 @@
 import '@fontsource-variable/public-sans'
-import '@fontsource-variable/bodoni-moda/opsz.css'
 import './index.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

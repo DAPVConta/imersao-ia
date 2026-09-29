@@ -74,13 +74,13 @@ docs/design.md             plano de design (paleta, fontes, layout, assinatura)
 .claude/skills/            skills do projeto (ver seção Skills)
 src/
   main.tsx                 liga o React, fontes e CSS
-  App.tsx                  cabeçalho + rotas + rodapé; chama iniciar()
+  App.tsx                  casca: menu lateral + barra do mês + página; chama iniciar()
   rotas.tsx                mapa de páginas (endereço → página)
   index.css                TOKENS DE COR (claro/escuro) e estilos globais
-  pages/                   uma página por rota (painel.tsx = "/")
+  pages/                   uma página por rota: painel (/), agenda, lancamentos, importar
   components/
     ui/                    componentes shadcn/ui (button, card, select, tabs, dialog...)
-    layout/                cabeçalho, rodapé, logo, faixa de aviso
+    layout/                menu lateral, barra do topo, nav do celular, cabeçalho de página, rodapé, logo, faixa de aviso
   features/<modulo>/       tudo de um assunto junto:
     tipos.ts               tipos do módulo
     banco.ts               ÚNICO lugar que fala com o Supabase sobre o módulo
@@ -111,8 +111,8 @@ Módulos que existem hoje: `financas` (dados, banco, regras), `painel`
    aplicada pelo MCP do Supabase (`apply_migration`), com **RLS habilitada** e
    as políticas na mesma migração. Depois regenerar `src/types/database.ts`
    (MCP `generate_typescript_types` ou `npm run gerar-tipos`).
-3. Página em `src/pages/<nome>.tsx` e rota em `src/rotas.tsx`; link no
-   `Cabecalho` se for uma área nova.
+3. Página em `src/pages/<nome>.tsx`, rota em `src/rotas.tsx` e item no menu
+   (`src/components/layout/menu.ts`) se for uma área nova.
 4. Regras de cálculo em funções puras com teste `*.test.ts` ao lado.
 5. Testar a tela com Playwright (seção "Como testar"), subir `VERSAO_APP`,
    atualizar o README.md e publicar.
@@ -176,31 +176,32 @@ grant select, insert, update, delete on public.<tabela> to anon, authenticated;
 ## Visual (design system)
 
 **O design está decidido em `docs/design.md` — ler antes de mexer na tela.**
-Resumo: identidade da cédula de real (papel-moeda esverdeado, tinta
-verde-pinho, verde de entrada, carmim de saída, violeta de ação) e a
-assinatura é a *cédula do mês* com guilhochê em SVG
-(`features/painel/components/cedula-do-mes.tsx`, geometria em
-`features/painel/guilloche.ts`).
+Resumo: aplicativo de páginas com **menu fixo à esquerda** (barra inferior no
+celular), barra do mês no topo, e cartões brancos sobre fundo cinza-azulado.
+Identidade: azul-petróleo da nota de R$ 100 (menu e ações), verde de entrada,
+carmim de saída, violeta do previsto; o guilhochê da cédula é marca-d'água da
+faixa de resultado (`features/painel/components/resultado-do-mes.tsx`,
+geometria em `features/painel/guilloche.ts`).
 
 - Cores **só por token**, nunca hex solto no componente: `bg-paper`, `bg-sheet`,
   `text-ink`, `text-ink-2`, `text-ink-mute`, `border-rule`, `text-credit-deep`
-  (entrou), `text-debit-deep` (saiu), `bg-accent` (ação/seleção), `bg-gold`
-  (alerta). Aceitam opacidade (`bg-accent/10`). Em SVG: `rgb(var(--credit))`.
+  (entrou), `text-debit-deep` (saiu), `bg-accent` (ação/seleção),
+  `text-previsto` (agenda), `bg-gold` (alerta), `bg-menu` / `text-menu-mute`
+  (menu lateral). Aceitam opacidade (`bg-accent/10`). Em SVG: `rgb(var(--credit))`.
 - Os tokens ficam em `src/index.css`, como canais RGB, com versão clara e
   escura. Um token novo precisa entrar **nos três blocos** (claro, escuro
   forçado e escuro automático) e em `tailwind.config.ts`. Não usar `dark:`.
-- Fontes: **Public Sans** (tudo) e **Bodoni Moda** (`font-cedula`) **só** no
-  valor da cédula e no nome do mês do topo. Valores sempre com a classe `num`
-  (algarismos alinhados).
+- Fonte: **Public Sans** só. Valores sempre com a classe `num`.
 - Proibido (vícios de design genérico apontados pela skill): rótulos em
   CAIXA-ALTA espaçada, "A · B · C", fonte monoespaçada em rótulo, `→` em
-  botão, cartões iguais com sombra em tudo, gradiente decorativo, animação de
-  entrada em cada seção, cartão que "sobe" no hover.
-- Estrutura de página: seções (`Card` = seção com linha no topo, sem caixa) e
-  `Superficie` (papel com borda) só para objetos: a cédula e tabelas.
-- Movimento: só a assinatura anima sozinha (e respeita "reduzir movimento");
-  o resto só responde a clique. Troca de mês usa `irParaMes()` (View
-  Transitions + setas ← → do teclado).
+  botão, gradiente decorativo sem significado (o da faixa de resultado é o
+  único), animação de entrada em cada seção, cartão que "sobe" no hover.
+- Estrutura: cada página tem `CabecalhoPagina` (título + contexto) e cartões
+  (`Card` + `CardTitle`); um assunto por cartão, nunca cartão dentro de
+  cartão (`Superficie` é só a moldura da tabela). Página nova = arquivo em
+  `src/pages/`, rota em `src/rotas.tsx` e item em `components/layout/menu.ts`.
+- Movimento: só responde a clique (troca de mês usa `irParaMes()`, View
+  Transitions + setas ← → do teclado) e respeita "reduzir movimento".
 - Componente novo do shadcn: copiar para `src/components/ui/` (o
   `components.json` já está configurado), **trocar as cores padrão pelos
   tokens** e as variações com `cva`, como em `button.tsx`.

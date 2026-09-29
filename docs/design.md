@@ -1,6 +1,12 @@
 # Design do Assistente Financeiro
 
-Plano feito com a skill `frontend-design` (`.claude/skills/frontend-design/SKILL.md`).
+Plano feito com a skill `frontend-design` (`.claude/skills/frontend-design/SKILL.md`),
+revisado em 29/09/2026 a pedido do dono: layout de painel com **menu fixo à
+esquerda**, cartões de indicadores e uma faixa de resultado no topo. As
+referências foram dois painéis administrativos (menu azul-marinho, faixa verde
+de resultado, cartões brancos com ícone); este plano parte deles e sobe a
+régua onde eles são genéricos.
+
 Todo módulo novo segue estas decisões; mudar alguma delas é decisão de design,
 não detalhe de implementação.
 
@@ -9,120 +15,116 @@ não detalhe de implementação.
 - **Assunto:** o fechamento do mês das finanças de uma casa brasileira —
   extrato da conta, fatura do cartão, contas a vencer.
 - **Público:** o dono, que não é da área de tecnologia. Abre o painel quando
-  a fatura chega e no fim do mês.
-- **Tarefa principal da tela:** responder "como o mês fechou e o que ainda
-  vem pela frente", em segundos, sem precisar interpretar gráfico.
+  a fatura chega, no fim do mês e quando quer saber "o que ainda vem".
+- **Tarefa principal:** responder "como o mês fechou e o que vem pela frente"
+  em segundos, e chegar a qualquer área (agenda, extrato, importar) com um
+  clique, sem rolar.
+
+## Estrutura
+
+Aplicativo de páginas, não uma página longa:
+
+```
+┌──────────┬─────────────────────────────────────────────────────────┐
+│ ●  Assis-│  ‹  agosto de 2026 ▾  ›   Novo mês              + Lançar │  barra do mês
+│ tente    ├─────────────────────────────────────────────────────────┤
+│          │  Painel                                                 │
+│ ▍Painel  │  41 lançamentos em agosto de 2026                       │
+│  Agenda  │  ┌──────────────────────────────────────────────────┐   │
+│  Lança-  │  │ Sobrou em agosto            Entrou     Saiu   ⊛ │   │  faixa de resultado
+│  mentos  │  │ R$ 1.590,31                 9.692     8.101  ⊛⊛ │   │  (guilhochê como marca-d'água)
+│  Trazer  │  │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━░░░░░░░  │   │
+│          │  └──────────────────────────────────────────────────┘   │
+│          │  ┌ Entrou ┐ ┌ Saiu ┐ ┌ Guardado ┐ ┌ A pagar 30d ┐       │  indicadores + tendência
+│          │  ┌ O ano mês a mês ─────────────────────────────────┐   │
+│          │  ┌ Para onde foi ──────┐ ┌ Conta e cartão ─────────┐   │
+│ ◐ ⇩ ⇧ v… │                                                         │
+└──────────┴─────────────────────────────────────────────────────────┘
+```
+
+- **Menu à esquerda** (248 px, fixo, azul-petróleo profundo): marca, quatro
+  páginas com ícone — Painel, Agenda, Lançamentos, Trazer lançamentos — e,
+  embaixo, tema, backup e versão. Item ativo: fundo um tom mais claro e um
+  traço verde à esquerda. No celular o menu vai para uma **barra inferior**,
+  ao alcance do polegar.
+- **Barra do topo**: o mês aberto (vale para todas as páginas: ‹ › , lista,
+  setas do teclado) e o botão "Lançar".
+- **Página**: título (24 px) + uma linha de contexto, e depois cartões. Um
+  assunto por cartão; largura máxima 1280 px.
+- Cartão = folha branca, canto 14 px, borda de 1 px e sombra leve. Não há
+  seção sem cartão nem cartão dentro de cartão (a tabela usa só uma moldura).
 
 ## De onde vem a identidade
 
-Do mundo do dinheiro impresso: a **cédula de real** e a impressão de segurança.
-Papel-moeda levemente esverdeado, tinta de talho-doce (verde-pinho profundo),
-as cores das notas (R$ 5 violeta, R$ 10 carmim, R$ 20 laranja, R$ 50 ocre,
-R$ 100 azul-petróleo) e o **guilhochê** — o rendilhado de linhas finas que
-protege as notas contra falsificação.
+Do dinheiro impresso, como antes, mas em papel administrativo: o azul-petróleo
+da nota de R$ 100 no menu e nas ações, verde de entrada, carmim de saída, e o
+**guilhochê** das cédulas como marca-d'água da faixa de resultado (o desenho
+muda a cada mês). É a única assinatura; o resto é sóbrio.
 
 ## Paleta (tema claro)
 
 | Nome | Hex | Uso |
 |---|---|---|
-| Papel-moeda | `#E8ECE6` | fundo da página |
-| Folha | `#F8F9F5` | superfícies (cédula, extrato) |
-| Tinta de talho | `#17302B` | texto principal |
-| Verde de entrada | `#1E7A55` | dinheiro que entrou / sobrou |
-| Carmim de saída | `#A3324A` | dinheiro que saiu / faltou |
-| Violeta de nota de 5 | `#5E4FA2` | ações, foco, mês selecionado |
+| Fundo | `#F3F5F8` | fundo da área de conteúdo |
+| Folha | `#FFFFFF` | cartões |
+| Tinta | `#142133` | texto principal |
+| Menu | `#0C243A` / `#143450` | menu lateral e item ativo |
+| Petróleo | `#14628C` | ações, foco, item selecionado (nota de R$ 100) |
+| Verde de entrada | `#16A36A` | dinheiro que entrou / sobrou |
+| Carmim de saída | `#DC3E54` | dinheiro que saiu / faltou |
+| Violeta | `#6A54C4` | o que está previsto (agenda) |
+| Âmbar | `#C77E14` | alerta (limite alto, vence logo) |
 
-Tema escuro: "cofre à noite" — fundo verde-pinho `#0E1A18` (nunca preto
-neutro), as mesmas cores mais claras. Tokens em `src/index.css`.
+Faixa de resultado: gradiente de tinta profunda (menu → verde-mar → verde de
+entrada) quando sobrou; (menu → vinho → carmim) quando faltou. Tema escuro:
+"cofre à noite" — fundo azul-ardósia (`#0E141E`), cartões `#17202E`, as mesmas
+cores mais claras. Tokens em `src/index.css`, sempre nos três blocos.
 
-As categorias usam as cores das cédulas (Moradia azul-petróleo da nota de 100,
-Alimentação laranja da de 20, Transporte ocre da de 50, Educação carmim da de
-10, Saúde violeta-rosado da de 5...), em `src/index.css` (`--cat-*`).
+As categorias usam as cores das cédulas (`--cat-*`), como antes.
 
 ## Tipografia
 
-- **Bodoni Moda** (serifa de alto contraste, como os valores impressos nas
-  cédulas) — só no valor principal da cédula do mês e no nome do mês. Com
-  parcimônia: nunca em rótulos ou tabelas.
-- **Public Sans** — todo o resto: sóbria, de extrato bancário, com algarismos
-  tabulares (`tabular-nums`) para colunas de valores alinharem.
-- Escala: 12 / 13 / 14 (corpo) / 16 / 20 / 28 / 64–88 (valor da cédula).
-- Rótulos em **caixa normal** (sentence case). Nada de CAIXA-ALTA espaçada,
-  nada de "A · B · C", nada de fonte monoespaçada em rótulo.
+- **Public Sans** para tudo, sem segunda família. A hierarquia vem de
+  tamanho e peso, não de troca de fonte.
+- Escala: 12 / 13 / 14 (corpo) / 17 (título de cartão) / 21 (indicador) /
+  24 (título de página) / 38–56 (resultado do mês).
+- Números sempre com `num` (algarismos tabulares); valores grandes com
+  espaçamento negativo (`tracking -.02em`).
+- Rótulos em caixa normal. Nada de CAIXA-ALTA espaçada, "A · B · C" ou fonte
+  monoespaçada.
 
-## Layout
+## Indicadores
 
-Coluna única, alinhada à esquerda, largura máxima 1180 px. É um extrato, não
-um mural de cartões: seções separadas por espaço e uma linha fina; superfície
-com fundo próprio só onde há objeto (a cédula e a tabela do extrato).
+Cada cartão de indicador diz quatro coisas, nesta ordem: o rótulo, o número,
+a **variação** em relação ao mês anterior (▲ ▼ %) e a **tendência** dos
+últimos seis meses numa linha sem eixos. O ícone tem fundo na cor do
+indicador (verde entrou, carmim saiu, petróleo guardado, violeta agenda).
+O cartão inteiro é um link para a página que detalha aquele número.
 
-```
-┌────────────────────────────────────────────────────────────┐
-│ logo  Assistente Financeiro     ‹  julho de 2026  ›  Lançar │  barra fina
-├────────────────────────────────────────────────────────────┤
-│ ┌── CÉDULA DO MÊS ───────────────────────────────────────┐ │
-│ │ ◎ guilhochê        Sobrou em julho                      │ │
-│ │   (anel = % que    R$ 5.960,40      ← Bodoni, grande     │ │
-│ │    sobrou)         Entrou 8.450 | Saiu 2.489 | frase    │ │
-│ └────────────────────────────────────────────────────────┘ │
-│ O ano   ▇▇ ▇▇ ▇▇ ▇▇  (entradas acima, saídas abaixo;       │
-│         ▂▂ ▃▃ ▂▂ ▅▅   cada mês é clicável e troca o mês)   │
-├──────────────────────────────┬─────────────────────────────┤
-│ Para onde foi o dinheiro     │ Conta e cartão              │
-│ ████████ Moradia   2.300     │ saldo, fatura, limite, mín. │
-├──────────────────────────────┴─────────────────────────────┤
-│ Agenda (o que ainda vai acontecer)                         │
-├────────────────────────────────────────────────────────────┤
-│ Extrato de julho (tabela)                                  │
-├────────────────────────────────────────────────────────────┤
-│ Trazer lançamentos (manual, PDF, CSV, exemplo, regras)     │
-└────────────────────────────────────────────────────────────┘
-```
+## Movimento
 
-No celular tudo empilha; a cédula vira vertical (guilhochê em cima).
-
-## Assinatura (a única ousadia)
-
-A **cédula do mês**: o resultado do mês impresso como uma nota, com um rosetão
-de guilhochê gerado em SVG. O rosetão é informação, não enfeite — o anel
-externo preenche a fração da receita que sobrou (a "poupança"). É o único
-momento animado sem clique: ao abrir e ao trocar de mês, as linhas do
-guilhochê se desenham e o valor conta até o número final.
-
-Todo o resto fica quieto: sem gradiente decorativo, sem sombra em tudo, sem
-cartão levantando no hover, sem animação de entrada por seção.
-
-## Recursos de interação
-
-- Trocar de mês por `‹ ›`, pelas setas ← → do teclado, pela lista ou
-  clicando no mês no gráfico do ano. A troca usa *View Transitions* do
-  navegador (transição suave nativa), quando disponível.
-- "Lançar" no topo leva direto ao formulário e já põe o cursor na descrição.
-- Movimento só responde a ação da pessoa (abrir diálogo, trocar de mês),
-  exceto a assinatura. `prefers-reduced-motion` desliga tudo.
+Só responde a ação da pessoa: trocar de mês (View Transitions), abrir
+diálogo, o número do resultado contando ao abrir. `prefers-reduced-motion`
+desliga tudo. Nada de entrada animada por seção, nada de cartão que sobe no
+hover (só a borda escurece).
 
 ## Texto
 
 Português simples, do ponto de vista de quem usa: "Entrou", "Saiu",
-"Sobrou", "Faltou", "Para onde foi o dinheiro". Botões dizem o que fazem
-("Adicionar lançamento", "Confirmar importação"); erros dizem o que houve e
-o que fazer; tela vazia convida a agir.
+"Sobrou", "Guardado", "A pagar em 30 dias", "Para onde foi o dinheiro".
+Botões dizem o que fazem; erros dizem o que houve e o que fazer; tela vazia
+convida a agir.
 
-## Revisão contra os padrões genéricos (feita antes de codar)
+## Revisão contra os padrões genéricos
 
-- *Primeira ideia:* manter a faixa azul-marinho com números grandes em
-  cartões coloridos e gradiente. É o "número grande + rótulo pequeno +
-  gradiente" genérico. **Trocado** pela cédula com guilhochê, que só faz
-  sentido para dinheiro.
-- *Paleta:* nem creme+terracota, nem preto+neon, nem marinho+dourado de SaaS.
-  Veio das cédulas. **Mantida.**
-- *Fontes:* Inter + JetBrains Mono eram escolhas padrão. **Trocadas** por
-  Bodoni Moda (restrita) + Public Sans.
-- *Estrutura:* "kit de cartões SaaS" (tudo em caixas iguais com sombra).
-  **Trocado** por seções de extrato separadas por linha.
-- *Rosca de categorias:* difícil de ler com muitas fatias. **Trocada** por
-  barras horizontais ordenadas, lidas como uma lista.
-- *Dois gráficos de linha/barra separados:* **fundidos** num só gráfico do
-  ano, que também serve para navegar entre meses.
-- *Acessório removido (Chanel):* a borda com microtexto de segurança em volta
-  da cédula — bonita, mas não informa nada. Fica só o guilhochê.
+- *Referência 1 (faixa verde chapada + cartões iguais):* a faixa virou
+  gradiente de tinta com o guilhochê como marca-d'água — só faz sentido para
+  dinheiro; os cartões ganharam variação e tendência, não só o número.
+- *Referência 2 (blocos em degradê arco-íris — roxo, verde, azul, laranja):*
+  bonitos, mas cada cor sem significado. **Trocados** por blocos de cor suave
+  onde a cor é a informação (carmim = a pagar, verde = a receber).
+- *Rótulos em caixa alta espaçada ("TEMPO TOTAL DO DIA"):* **recusados**.
+- *Fonte serifada Bodoni da versão anterior:* fazia sentido na "cédula";
+  num painel administrativo vira enfeite. **Removida.**
+- *Paleta genérica de SaaS (marinho + azul-elétrico):* o azul virou o
+  petróleo da nota de R$ 100, e o verde/carmim seguem as cédulas.

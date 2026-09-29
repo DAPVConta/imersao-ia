@@ -8,7 +8,7 @@ export function ParaOndeFoi({ totais }: { totais: Totais }) {
   const linhas = Object.entries(totais.porCategoria).sort((a, b) => b[1] - a[1])
   const maior = linhas[0]?.[1] ?? 1
   return (
-    <Card className="border-t-0 pt-0">
+    <Card>
       <CardTitle dica="Só despesas da conta e do cartão. Transferências ficam de fora.">Para onde foi o dinheiro</CardTitle>
       {!linhas.length ? (
         <p className="text-[14px] text-ink-mute">Nenhuma despesa neste mês. Lance uma ou importe o extrato logo abaixo.</p>
