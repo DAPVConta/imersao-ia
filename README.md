@@ -132,6 +132,8 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **05/10/2026 — `v05/10/2026-b`**: textos da one page em linguagem simples,
+  ícones em relevo e botões que abrem o WhatsApp.
 - **05/10/2026 — `v05/10/2026-a`**: página de chamada da 3ª turma da
   Imersão em IA em `/imersao.html` (estilo neumorphism, com programa, jornada,
   o que o aluno leva e investimento). Skill `find-skills` instalada.

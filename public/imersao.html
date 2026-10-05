@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Imersão em IA 3ª Turma</title>
-<meta name="description" content="Chamada para a 3ª turma da Imersão em IA: do zero ao primeiro sistema publicado na internet, sem escrever código.">
+<meta name="description" content="Chamada para a 3ª turma da Imersão em IA: do zero ao seu primeiro aplicativo na internet, sem saber programar.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..900,100&family=Manrope:wght@400;500;600;700;800&display=swap">
@@ -112,8 +112,8 @@
   .acoes { display: grid; gap: 14px; }
 
   /* Fatos */
-  .fatos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .fato { padding: 20px 18px; display: grid; gap: 2px; }
+  .fatos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .fato { padding: 16px 18px; display: grid; gap: 2px; min-width: 0; }
   .fato__valor { font-family: var(--fonte-titulo); font-size: 40px; font-weight: 800; line-height: 1; color: var(--ouro); font-variant-numeric: tabular-nums; font-variation-settings: "opsz" 96, "SOFT" 100; }
   .fato__rot { color: var(--tinta-2); font-size: 15px; font-weight: 600; }
 
@@ -206,13 +206,30 @@
     .medalhao { animation: respira 3.2s ease-in-out infinite alternate; }
   }
 
+  /* Ícones */
+  .ico { display: block; }
+  .fato { grid-template-columns: 48px auto minmax(0, 1fr); grid-template-rows: auto; column-gap: 14px; align-items: center; }
+  .fato__rot { overflow-wrap: anywhere; }
+  .fato__ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--alto-p); color: var(--ouro); }
+  .bloco__ico { width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; box-shadow: var(--baixo-p); color: var(--ouro); margin-bottom: 6px; }
+  .bloco__ico .ico { width: 28px; height: 28px; }
+  .etapa__bola .ico, .aula__num .ico { width: 28px; height: 28px; }
+  .etapa__num { font-size: 13px; font-weight: 800; color: var(--tinta-suave); }
+  .chip { display: inline-flex; align-items: center; gap: 8px; }
+  .chip .ico { width: 18px; height: 18px; color: var(--ouro); }
+  .botao .ico { width: 20px; height: 20px; }
+  .titulo-ico { display: grid; gap: 12px; }
+  @media (min-width: 640px) { .titulo-ico { grid-auto-flow: column; justify-content: start; align-items: center; gap: 18px; } .titulo-ico .bloco__ico { margin: 0; } }
+
   /* Telas maiores */
   @media (min-width: 640px) {
     body { padding-inline: 32px; font-size: 18px; }
     .pagina { gap: 72px; }
     .acoes { grid-auto-flow: column; justify-content: center; }
     .botao { width: auto; }
-    .fatos { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .fatos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+    .fato { grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto auto; padding: 20px 18px; }
+    .fato__ico { grid-row: span 2; }
     .tres { grid-template-columns: repeat(3, 1fr); }
     .leva__item { grid-template-columns: 44px minmax(0, 1fr) auto; }
     .leva__ok { grid-row: auto; }
@@ -253,26 +270,26 @@
     <div class="topo__texto">
       <span class="chamada"><span class="chamada__ponto" aria-hidden="true"></span>Inscrições abertas</span>
       <h1>Imersão em IA</h1>
-      <p class="lead">Do zero ao primeiro sistema publicado na internet, construído inteiramente por conversas com a IA. Sem escrever uma linha de código.</p>
+      <p class="lead">Aprenda a usar a inteligência artificial no seu dia a dia e saia do curso com um aplicativo seu, feito só conversando com a IA. Sem saber nada de programação.</p>
       <div class="acoes">
-        <a class="botao botao--ouro" href="https://wa.me/5511954478714?text=Ol%C3%A1%21%20Quero%20uma%20vaga%20na%203%C2%AA%20turma%20da%20Imers%C3%A3o%20em%20IA." target="_blank" rel="noopener">Quero minha vaga</a>
+        <a class="botao botao--ouro" href="https://wa.me/5511954478714?text=Ol%C3%A1%21%20Quero%20uma%20vaga%20na%203%C2%AA%20turma%20da%20Imers%C3%A3o%20em%20IA." target="_blank" rel="noopener"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-.9.9a4.8 4.8 0 0 1-2.9-2.9l.9-.9-1-2z"/></svg>Quero minha vaga</a>
         <a class="botao botao--secundario" href="#jornada">Ver como funciona</a>
       </div>
     </div>
   </header>
 
   <section class="fatos" aria-label="Resumo do curso">
-    <div class="poco fato"><span class="fato__valor">4</span><span class="fato__rot">encontros ao vivo</span></div>
-    <div class="poco fato"><span class="fato__valor">2h</span><span class="fato__rot">de duração cada</span></div>
-    <div class="poco fato"><span class="fato__valor">1</span><span class="fato__rot">aula gravada de preparação</span></div>
-    <div class="poco fato"><span class="fato__valor">0</span><span class="fato__rot">linhas de código escritas por você</span></div>
+    <div class="poco fato"><span class="fato__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><span class="fato__valor">4</span><span class="fato__rot">encontros ao vivo</span></div>
+    <div class="poco fato"><span class="fato__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="fato__valor">2h</span><span class="fato__rot">de duração cada</span></div>
+    <div class="poco fato"><span class="fato__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5.5v13l11-6.5z"/></svg></span><span class="fato__valor">1</span><span class="fato__rot">aula gravada para se preparar</span></div>
+    <div class="poco fato"><span class="fato__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/></svg></span><span class="fato__valor">0</span><span class="fato__rot">experiência com programação</span></div>
   </section>
 
   <section class="placa objetivo" aria-labelledby="objetivo">
     <span class="traco" aria-hidden="true"></span>
-    <p class="texto">Objetivo do programa</p>
-    <h2 id="objetivo">Ao final, cada participante terá publicado na internet um sistema próprio, com seus dados salvos com segurança e acessível de qualquer dispositivo.</h2>
-    <p class="lead">E, antes disso, já estará usando a IA como assistente pessoal para organizar a rotina e automatizar tarefas do dia a dia.</p>
+    <p class="texto">Aonde você chega</p>
+    <h2 id="objetivo">No fim do curso, você terá o seu próprio aplicativo funcionando na internet, com as suas informações guardadas em segurança e aberto de qualquer celular ou computador.</h2>
+    <p class="lead">E, antes disso, a IA já estará trabalhando como sua assistente pessoal: organizando a rotina e fazendo por você tarefas repetitivas do dia a dia.</p>
   </section>
 
   <section class="secao" aria-labelledby="para-quem">
@@ -282,66 +299,65 @@
     </div>
     <div class="tres">
       <div class="placa bloco">
-        <h3>Público</h3>
-        <p>Profissionais e empreendedores sem conhecimento de programação que querem usar IA no dia a dia e criar os próprios sistemas web.</p>
+        <span class="bloco__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5a5 5 0 0 1 6 4.5"/></svg></span>
+        <h3>Para quem é</h3>
+        <p>Para profissionais e donos de negócio que nunca programaram e querem usar a IA no dia a dia e ter um aplicativo próprio, sem depender de ninguém.</p>
       </div>
       <div class="placa bloco">
-        <h3>Pré-requisitos</h3>
-        <p>Computador com Google Chrome logado em uma conta Gmail e assinatura paga do Claude. Nada mais é necessário para começar.</p>
+        <span class="bloco__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></svg></span>
+        <h3>O que você precisa</h3>
+        <p>Um computador com o navegador Google Chrome, uma conta do Gmail e a assinatura paga do Claude, a IA que vamos usar. Nada mais.</p>
       </div>
       <div class="placa bloco">
-        <h3>Metodologia</h3>
-        <p>Aprendizado por prática. A aula 1 aplica a IA à rotina dos participantes; as aulas 2 a 4 constroem juntos um sistema-guia, que cada aluno pode adaptar ao seu próprio negócio.</p>
+        <span class="bloco__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H14a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.5"/></svg></span>
+        <h3>Como funciona</h3>
+        <p>Aprendendo na prática. Na aula 1 a IA entra na sua rotina. Nas aulas 2 a 4 construímos juntos um aplicativo de exemplo, que você depois adapta para o seu negócio.</p>
       </div>
     </div>
-    <div class="ferramentas" aria-label="Ferramentas usadas no curso">
-      <span class="chip">Claude Chat, Desktop e Chrome</span>
-      <span class="chip">Claude Code</span>
-      <span class="chip">GitHub</span>
-      <span class="chip">Supabase</span>
-      <span class="chip">Vercel</span>
-      <span class="chip">Sistema-guia: assistente financeiro pessoal</span>
+    <div class="ferramentas" aria-label="O que vamos usar">
+      <span class="chip"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l10-10"/><path d="M15 3l.9 2.1L18 6l-2.1.9L15 9l-.9-2.1L12 6l2.1-.9z"/><path d="M19 11l.6 1.4L21 13l-1.4.6L19 15l-.6-1.4L17 13l1.4-.6z"/></svg>O Claude no celular, no computador e no navegador</span>
+      <span class="chip"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v5M15 3v5"/><path d="M6 8h12v3a6 6 0 0 1-12 0z"/><path d="M12 17v4"/></svg>Três serviços gratuitos para guardar e publicar o seu aplicativo</span>
+      <span class="chip"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="6" y="11" width="3" height="6" rx="1"/><rect x="11" y="6" width="3" height="11" rx="1"/><rect x="16" y="9" width="3" height="8" rx="1"/></svg>Aplicativo de exemplo: controle das suas finanças</span>
     </div>
   </section>
 
   <section class="secao" id="jornada" aria-labelledby="jornada-titulo">
     <div class="secao__cabeca">
       <span class="traco" aria-hidden="true"></span>
-      <h2 id="jornada-titulo">A jornada em cinco etapas</h2>
+      <h2 id="jornada-titulo">O caminho em cinco passos</h2>
     </div>
     <div class="trilho">
       <article class="placa etapa">
-        <span class="etapa__bola">1</span>
+        <span class="etapa__bola"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/></svg></span><span class="etapa__num">Aula 1</span>
         <span class="etapa__tipo">Ao vivo</span>
-        <h3>Introdução à IA</h3>
-        <p>A IA organizando o dia a dia e automatizando operações.</p>
+        <h3>A IA no seu dia a dia</h3>
+        <p>A IA passa a organizar a sua rotina e a fazer tarefas por você.</p>
       </article>
       <article class="placa etapa">
-        <span class="etapa__bola etapa__bola--gravada">▶</span>
-        <span class="etapa__tipo etapa__tipo--gravada">Gravada</span>
-        <h3>Preparando as ferramentas</h3>
-        <p>Contas criadas e ferramentas conectadas antes da aula 2.</p>
+        <span class="etapa__bola etapa__bola--gravada"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5.5v13l11-6.5z"/></svg></span><span class="etapa__tipo etapa__tipo--gravada">Aula gravada</span>
+        <h3>Preparando o terreno</h3>
+        <p>Você cria as contas que vai usar, com calma, antes da aula 2.</p>
       </article>
       <article class="placa etapa">
-        <span class="etapa__bola">2</span>
+        <span class="etapa__bola"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="6" y="11" width="3" height="6" rx="1"/><rect x="11" y="6" width="3" height="11" rx="1"/><rect x="16" y="9" width="3" height="8" rx="1"/></svg></span><span class="etapa__num">Aula 2</span>
         <span class="etapa__tipo">Ao vivo</span>
-        <h3>Primeiro sistema</h3>
-        <p>Dos seus extratos a um painel financeiro.</p>
+        <h3>Seu primeiro aplicativo</h3>
+        <p>Dos seus extratos do banco a um painel das suas finanças.</p>
       </article>
       <article class="placa etapa">
-        <span class="etapa__bola">3</span>
+        <span class="etapa__bola"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="etapa__num">Aula 3</span>
         <span class="etapa__tipo">Ao vivo</span>
-        <h3>Sistema na internet</h3>
-        <p>Base profissional e um endereço próprio na web.</p>
+        <h3>Seu aplicativo na internet</h3>
+        <p>Ele ganha um endereço próprio para abrir de qualquer lugar.</p>
       </article>
       <article class="placa etapa">
-        <span class="etapa__bola">4</span>
+        <span class="etapa__bola"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.2"/></svg></span><span class="etapa__num">Aula 4</span>
         <span class="etapa__tipo">Ao vivo</span>
-        <h3>Dados salvos e acesso seguro</h3>
-        <p>Informações guardadas, login com senha e acesso pelo celular.</p>
+        <h3>Suas informações seguras</h3>
+        <p>Dados guardados, entrada com senha e uso pelo celular.</p>
       </article>
     </div>
-    <p class="dica">Deslize para o lado para ver as etapas</p>
+    <p class="dica">Deslize para o lado para ver os passos</p>
   </section>
 
   <section class="secao" aria-labelledby="aulas-titulo">
@@ -352,93 +368,93 @@
     <div class="aulas">
 
       <article class="placa aula">
-        <div class="aula__topo"><span class="aula__num">1</span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
-        <h3>Introdução à IA: organizando o dia a dia e automatizando operações</h3>
-        <p class="texto">Sair da aula com a IA instalada, conectada às suas ferramentas e já trabalhando por você.</p>
+        <div class="aula__topo"><span class="aula__num"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/></svg></span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
+        <h3>A IA no seu dia a dia</h3>
+        <p class="texto">Você sai da aula com a IA instalada, ligada às ferramentas que já usa e trabalhando por você.</p>
         <details>
           <summary></summary>
           <ul>
-            <li>O que a IA faz bem (e mal), seus limites de uso e por que ela às vezes "esquece" a conversa</li>
-            <li>As versões do Claude e para que serve cada uma: no navegador, no computador, no Chrome e para criar documentos, designs e sistemas</li>
-            <li>Instalação guiada do Claude no computador e no Google Chrome</li>
-            <li>Conectando a IA às ferramentas que você já usa no trabalho</li>
-            <li>Construção de casos práticos para o dia a dia, aplicados à rotina dos participantes</li>
-            <li>Segurança: o que nunca compartilhar com a IA e como conceder permissões com cautela</li>
+            <li>O que a IA faz bem, o que faz mal e por que às vezes ela "esquece" o que você disse</li>
+            <li>As versões do Claude e para que serve cada uma: no celular, no computador, no navegador e para criar textos, apresentações e aplicativos</li>
+            <li>Instalação do Claude no seu computador e no Google Chrome, passo a passo</li>
+            <li>Ligando a IA ao seu e-mail, à sua agenda e às ferramentas que você já usa no trabalho</li>
+            <li>Exemplos práticos montados na hora, com a rotina de cada participante</li>
+            <li>Segurança: o que nunca contar para a IA e como dar permissões com cuidado</li>
           </ul>
         </details>
       </article>
 
       <article class="placa aula">
-        <div class="aula__topo"><span class="aula__num aula__num--gravada">▶</span><span class="aula__meta aula__meta--gravada">Aula gravada, assistir antes da aula 2</span></div>
-        <h3>Preparando suas ferramentas</h3>
-        <p class="texto">Cada aluno chega à aula 2 com contas criadas, ferramentas conectadas e o checklist concluído.</p>
+        <div class="aula__topo"><span class="aula__num aula__num--gravada"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5.5v13l11-6.5z"/></svg></span><span class="aula__meta aula__meta--gravada">Aula gravada, assistir antes da aula 2</span></div>
+        <h3>Preparando o terreno</h3>
+        <p class="texto">Você chega à aula 2 com as contas criadas e tudo ligado, sem correria.</p>
         <details>
           <summary></summary>
           <ul>
-            <li>Como um sistema funciona: a tela que você vê, os dados guardados e o endereço na internet</li>
-            <li>As quatro ferramentas do curso: Claude Code constrói, GitHub guarda o projeto, Supabase guarda os dados e Vercel coloca o sistema no ar</li>
-            <li>Criação das contas no GitHub, Supabase e Vercel com o mesmo e-mail</li>
-            <li>Abrindo o Claude Code e criando o espaço do seu projeto</li>
-            <li>Conectando as três ferramentas ao Claude</li>
+            <li>Como um aplicativo funciona por dentro, explicado de forma simples: a tela, as informações guardadas e o endereço na internet</li>
+            <li>Os quatro ajudantes do curso: a IA constrói, um serviço guarda o projeto, outro guarda as informações e outro coloca o aplicativo no ar</li>
+            <li>Criando as três contas gratuitas, todas com o mesmo e-mail</li>
+            <li>Abrindo a IA no computador e criando a pasta do seu projeto</li>
+            <li>Ligando os três serviços à IA</li>
             <li>Onde guardar senhas e códigos de acesso com segurança</li>
-            <li>Problemas comuns e como resolver: navegador, zoom da tela, endereço errado e permissões de acesso</li>
-            <li>Checklist final: tudo pronto para a aula 2</li>
+            <li>Problemas comuns e como resolver: navegador, tamanho da tela, endereço errado e permissões</li>
+            <li>Lista final para conferir: tudo pronto para a aula 2</li>
           </ul>
         </details>
       </article>
 
       <article class="placa aula">
-        <div class="aula__topo"><span class="aula__num">2</span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
-        <h3>Primeiro sistema funcional</h3>
-        <p class="texto">Um painel financeiro criado a partir dos seus próprios extratos e faturas, funcionando no seu computador.</p>
+        <div class="aula__topo"><span class="aula__num"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="6" y="11" width="3" height="6" rx="1"/><rect x="11" y="6" width="3" height="11" rx="1"/><rect x="16" y="9" width="3" height="8" rx="1"/></svg></span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
+        <h3>Seu primeiro aplicativo</h3>
+        <p class="texto">Um painel das suas finanças, feito a partir dos seus próprios extratos e faturas, funcionando no seu computador.</p>
         <details>
           <summary></summary>
           <ul>
-            <li>Do extrato bancário e da fatura do cartão a um painel financeiro, com um único pedido à IA</li>
+            <li>Do extrato do banco e da fatura do cartão a um painel das suas finanças, com um único pedido à IA</li>
             <li>Deixando a IA trabalhar sem pedir confirmação a cada passo</li>
-            <li>Instalando um pacote de habilidades de design para um visual profissional</li>
-            <li>Melhorando o visual a partir de uma imagem de referência</li>
-            <li>Boa prática: primeiro funcionar, depois ficar bonito</li>
-            <li>Frases que resolvem: "Não sou programador, explique de forma simples" e quando começar uma conversa nova</li>
+            <li>Dando à IA um "pacote de bom gosto" para o visual sair profissional</li>
+            <li>Melhorando o visual a partir de uma imagem que você gosta</li>
+            <li>Regra de ouro: primeiro funcionar, depois ficar bonito</li>
+            <li>Frases que resolvem: "Não sou programador, explique de forma simples" e quando vale começar uma conversa nova</li>
           </ul>
         </details>
       </article>
 
       <article class="placa aula">
-        <div class="aula__topo"><span class="aula__num">3</span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
-        <h3>Seu sistema na internet</h3>
-        <p class="texto">O sistema ganha uma base profissional, regras que a IA sempre segue e um endereço próprio na web.</p>
+        <div class="aula__topo"><span class="aula__num"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
+        <h3>Seu aplicativo na internet</h3>
+        <p class="texto">O aplicativo fica mais robusto, ganha regras que a IA sempre segue e um endereço próprio na internet.</p>
         <details>
           <summary></summary>
           <ul>
-            <li>Atualizando o sistema para as tecnologias mais usadas hoje no mercado, com a IA reconstruindo tudo sem você escrever código</li>
-            <li>Qual versão do Claude usar: a mais potente para tarefas complexas, a mais ágil para o dia a dia</li>
-            <li>O manual do projeto: regras que a IA consulta sempre, sem você precisar repetir</li>
-            <li>Habilidades extras para design, segurança dos dados e planejamento de novos sistemas</li>
-            <li>Dados organizados por assunto, como abas separadas de uma planilha</li>
-            <li>A IA salva cada nova versão no GitHub; versão de teste e versão oficial no Vercel</li>
-            <li>Link oficial, histórico de versões e como voltar a uma versão anterior</li>
-            <li>Logo, ícone da aba do navegador e novo visual a partir de referências</li>
-            <li>Exercício: criar uma nova parte do sistema, do planejamento até o ar</li>
+            <li>A IA refaz o aplicativo com a tecnologia mais usada hoje, sem você mexer em nada</li>
+            <li>Qual versão do Claude usar: a mais forte para tarefas difíceis, a mais rápida para o dia a dia</li>
+            <li>O "manual do projeto": regras que a IA consulta sempre, sem você precisar repetir</li>
+            <li>Ajudantes extras para visual, segurança das informações e planejamento de novas partes</li>
+            <li>Informações organizadas por assunto, como abas de uma planilha</li>
+            <li>Cada versão nova fica guardada; você tem uma versão de teste e a versão oficial</li>
+            <li>Endereço oficial, histórico de versões e como voltar atrás se algo der errado</li>
+            <li>Logo, ícone da aba do navegador e visual novo a partir de referências</li>
+            <li>Exercício: criar uma parte nova do aplicativo, do planejamento até ficar no ar</li>
           </ul>
         </details>
       </article>
 
       <article class="placa aula">
-        <div class="aula__topo"><span class="aula__num">4</span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
-        <h3>Dados salvos e acesso seguro de qualquer lugar</h3>
-        <p class="texto">Informações guardadas com segurança, acesso protegido por usuário e senha e funcionando no celular: o primeiro sistema completo.</p>
+        <div class="aula__topo"><span class="aula__num"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.2"/></svg></span><span class="aula__meta">Aula ao vivo, 2 horas</span></div>
+        <h3>Suas informações seguras, de qualquer lugar</h3>
+        <p class="texto">Informações guardadas em segurança, entrada com usuário e senha e funcionando no celular: o seu primeiro aplicativo completo.</p>
         <details>
           <summary></summary>
           <ul>
-            <li>Onde encontrar o endereço e a chave de acesso dos seus dados no Supabase</li>
-            <li>Cadastrando essas informações no Vercel e atualizando o sistema no ar</li>
-            <li>Criando as tabelas de dados com um pedido à IA e conferindo o resultado</li>
-            <li>Quem pode ver o quê: as regras de proteção dos dados</li>
-            <li>Quando a tela não mostra os dados: como corrigir enviando um print à IA</li>
-            <li>Tela de acesso com usuário e senha: só entra quem você autorizar</li>
-            <li>Importando novos extratos e testando no celular</li>
-            <li>Endereço próprio (ex.: seunome.com.br) e privacidade do sistema</li>
+            <li>Onde encontrar o endereço e a senha do lugar que guarda as suas informações</li>
+            <li>Ligando esse lugar ao aplicativo que está no ar</li>
+            <li>Criando o espaço das suas informações com um pedido à IA e conferindo o resultado</li>
+            <li>Quem pode ver o quê: as regras de proteção das suas informações</li>
+            <li>Quando a tela não mostra as informações: como resolver mandando um print para a IA</li>
+            <li>Tela de entrada com usuário e senha: só entra quem você autorizar</li>
+            <li>Trazendo novos extratos e testando no celular</li>
+            <li>Um endereço com o seu nome (ex.: seunome.com.br) e a privacidade do aplicativo</li>
           </ul>
         </details>
       </article>
@@ -452,44 +468,44 @@
       <h2 id="leva-titulo">O que você leva para casa</h2>
     </div>
     <div class="placa leva">
-      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Assistente pessoal configurado com pelo menos uma automação funcionando</span><span class="leva__aula">Aula 1</span></div>
-      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Ferramentas criadas e conectadas</span><span class="leva__aula">Aula gravada</span></div>
-      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Painel financeiro funcionando no seu computador</span><span class="leva__aula">Aula 2</span></div>
-      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Sistema com base profissional, publicado com link próprio</span><span class="leva__aula">Aula 3</span></div>
-      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Sistema com dados salvos e login, acessível pelo celular</span><span class="leva__aula">Aula 4</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">A IA como assistente pessoal, já fazendo pelo menos uma tarefa por você</span><span class="leva__aula">Aula 1</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Suas contas criadas e ligadas à IA</span><span class="leva__aula">Aula gravada</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Um painel das suas finanças funcionando no seu computador</span><span class="leva__aula">Aula 2</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Seu aplicativo no ar, com endereço próprio</span><span class="leva__aula">Aula 3</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Seu aplicativo completo: informações guardadas, senha e uso pelo celular</span><span class="leva__aula">Aula 4</span></div>
     </div>
   </section>
 
   <section class="placa invest" id="investimento" aria-labelledby="invest-titulo">
     <div class="invest__texto">
       <span class="traco" aria-hidden="true"></span>
-      <h2 id="invest-titulo">Investimento</h2>
-      <p class="lead">Um valor único para o programa completo, com o instrutor ao lado em cada etapa.</p>
+      <div class="titulo-ico"><span class="bloco__ico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 14h18"/><path d="M12 9c-2.5 0-4.5-1.5-4.5-3S9 3.5 12 9c3-5.5 4.5-4.5 4.5-3S14.5 9 12 9z"/></svg></span><h2 id="invest-titulo">Investimento</h2></div>
+      <p class="lead">Um valor único para o curso completo, com o instrutor ao seu lado em cada passo.</p>
       <ul class="inclui">
         <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>4 encontros ao vivo de 2 horas</span></li>
-        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Aula gravada de preparação das ferramentas</span></li>
-        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Sistema-guia completo para adaptar ao seu negócio</span></li>
-        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Seu sistema publicado na internet ao final da imersão</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Aula gravada para se preparar com calma</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Aplicativo de exemplo completo para adaptar ao seu negócio</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Seu aplicativo no ar no fim do curso</span></li>
       </ul>
     </div>
     <div class="poco visor">
-      <span class="visor__rot">Programa completo</span>
+      <span class="visor__rot">Curso completo</span>
       <div class="visor__preco"><small>R$</small>750</div>
       <p class="visor__parcela">ou em até <strong>10x na maquineta</strong></p>
       <p class="visor__nota">Parcelamento com os juros da maquineta de cartão.</p>
-      <a class="botao botao--ouro" href="https://wa.me/5511954478714?text=Ol%C3%A1%21%20Quero%20uma%20vaga%20na%203%C2%AA%20turma%20da%20Imers%C3%A3o%20em%20IA." target="_blank" rel="noopener">Garantir minha vaga pelo WhatsApp</a>
+      <a class="botao botao--ouro" href="https://wa.me/5511954478714?text=Ol%C3%A1%21%20Quero%20uma%20vaga%20na%203%C2%AA%20turma%20da%20Imers%C3%A3o%20em%20IA." target="_blank" rel="noopener"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-.9.9a4.8 4.8 0 0 1-2.9-2.9l.9-.9-1-2z"/></svg>Garantir minha vaga pelo WhatsApp</a>
       <p class="visor__nota">Ou chame direto: <strong>(11) 95447-8714</strong></p>
     </div>
   </section>
 
   <section class="placa fecho" aria-labelledby="fecho-titulo">
     <span class="traco" aria-hidden="true"></span>
-    <h2 id="fecho-titulo">Do zero ao seu primeiro sistema em quatro encontros.</h2>
-    <p class="lead">Sem programação, sem teoria em excesso. Apenas prática, com o instrutor ao lado em cada etapa.</p>
+    <h2 id="fecho-titulo">Do zero ao seu primeiro aplicativo em quatro encontros.</h2>
+    <p class="lead">Sem programação, sem teoria demais. Só prática, com o instrutor ao seu lado em cada passo.</p>
   </section>
 
   <footer class="rodape">
-    <span>Imersão em IA, do zero ao primeiro sistema</span>
+    <span>Imersão em IA, do zero ao primeiro aplicativo</span>
     <span>Instrutor: Adriano Portugal</span>
   </footer>
 
@@ -497,7 +513,7 @@
 
 <div class="barra" role="region" aria-label="Inscrição">
   <div class="barra__preco"><strong>R$ 750</strong><span>ou 10x na maquineta</span></div>
-  <a class="botao botao--ouro" href="https://wa.me/5511954478714?text=Ol%C3%A1%21%20Quero%20uma%20vaga%20na%203%C2%AA%20turma%20da%20Imers%C3%A3o%20em%20IA." target="_blank" rel="noopener">Quero minha vaga</a>
+  <a class="botao botao--ouro" href="https://wa.me/5511954478714?text=Ol%C3%A1%21%20Quero%20uma%20vaga%20na%203%C2%AA%20turma%20da%20Imers%C3%A3o%20em%20IA." target="_blank" rel="noopener"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-.9.9a4.8 4.8 0 0 1-2.9-2.9l.9-.9-1-2z"/></svg>Quero minha vaga</a>
 </div>
 </body>
 </html>
