@@ -79,6 +79,7 @@ repositório (a regra está no `CLAUDE.md`):
 
 - `frontend-design` ([anthropics/skills](https://github.com/anthropics/skills/tree/main/skills/frontend-design)) — design de interface.
 - `supabase` e `supabase-postgres-best-practices` ([supabase/agent-skills](https://github.com/supabase/agent-skills)) — banco, segurança e desempenho.
+- `find-skills` ([vercel-labs/skills](https://github.com/vercel-labs/skills/tree/main/skills/find-skills)) — procura e instala skills novas pelo `npx skills`. Instalada em `.agents/skills/` com atalho em `.claude/skills/` (registro em `skills-lock.json`).
 
 ## Rodar na sua máquina
 
@@ -131,6 +132,9 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **05/10/2026 — `v05/10/2026-a`**: página de chamada da 3ª turma da
+  Imersão em IA em `/imersao.html` (estilo neumorphism, com programa, jornada,
+  o que o aluno leva e investimento). Skill `find-skills` instalada.
 - **29/09/2026 — `v29/09/2026-b`**: agenda de pagamentos e recebimentos —
   botão *Agendar* (uma vez ou todo mês) e confirmação com a data e o valor
   reais. A agenda passou a ter um compartimento próprio no banco (schema
