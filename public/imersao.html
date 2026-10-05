@@ -209,7 +209,6 @@
   /* Ícones */
   .ico { display: block; }
   .fato { grid-template-columns: 48px auto minmax(0, 1fr); grid-template-rows: auto; column-gap: 14px; align-items: center; }
-  .fato__rot { overflow-wrap: anywhere; }
   .fato__ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--alto-p); color: var(--ouro); }
   .bloco__ico { width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; box-shadow: var(--baixo-p); color: var(--ouro); margin-bottom: 6px; }
   .bloco__ico .ico { width: 28px; height: 28px; }
@@ -227,7 +226,7 @@
     .pagina { gap: 72px; }
     .acoes { grid-auto-flow: column; justify-content: center; }
     .botao { width: auto; }
-    .fatos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+    .fatos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
     .fato { grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto auto; padding: 20px 18px; }
     .fato__ico { grid-row: span 2; }
     .tres { grid-template-columns: repeat(3, 1fr); }
@@ -235,6 +234,9 @@
     .leva__ok { grid-row: auto; }
     .leva__aula { white-space: nowrap; }
     .rodape { grid-auto-flow: column; justify-content: space-between; text-align: left; }
+  }
+  @media (min-width: 1000px) {
+    .fatos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
   }
   @media (min-width: 900px) {
     body { padding-block: 40px 80px; }
