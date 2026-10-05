@@ -98,7 +98,8 @@ vercel.json                build, cache e rotas da Vercel
 .env                       URL e chave PUBLICÁVEL do Supabase (pode ficar no git)
 ```
 
-Módulos que existem hoje: `financas` (dados, banco, regras), `painel`
+Módulos que existem hoje: `acesso` (login, nova senha, membros; schema
+`acesso` no banco), `financas` (dados, banco, regras), `painel`
 (gráficos e tabelas), `importacao` (manual, PDF, CSV, regras), `agenda`
 (pagamentos e recebimentos previstos; schema `agenda` no banco).
 
@@ -130,15 +131,16 @@ agenda faz (migração `20260929002345_agenda_em_schema_proprio.sql`):
 
 ```sql
 create schema <modulo>;
-grant usage on schema <modulo> to anon, authenticated, service_role;
+grant usage on schema <modulo> to authenticated, service_role;
 create table <modulo>.<tabela> (...);
 alter table <modulo>.<tabela> enable row level security;
-create policy ... on <modulo>.<tabela> ...;          -- as regras de sempre
-grant select, insert, update, delete on <modulo>.<tabela> to anon, authenticated, service_role;
+create policy ... on <modulo>.<tabela> ... to authenticated   -- membro: ver "Banco de dados"
+  using ((usuario_id is null and (select acesso.e_membro())) or (select auth.uid()) = usuario_id);
+grant select, insert, update, delete on <modulo>.<tabela> to authenticated, service_role;
 -- janela da API: visão simples = dá para ler e gravar por ela
 create view public.<tabela> with (security_invoker = on) as select ... from <modulo>.<tabela>;
 revoke all on public.<tabela> from anon, authenticated;
-grant select, insert, update, delete on public.<tabela> to anon, authenticated;
+grant select, insert, update, delete on public.<tabela> to authenticated;
 ```
 
 - `security_invoker = on` é obrigatório: faz a RLS da tabela valer para quem
@@ -146,7 +148,10 @@ grant select, insert, update, delete on public.<tabela> to anon, authenticated;
 - Visão de uma tabela só (sem join, sem agregação) aceita insert, update,
   delete e upsert com `onConflict` direto — o código do front usa
   `supabase.from('<tabela>')` normalmente. Visão com join é só leitura.
-- Testar as permissões com `set local role anon;` pelo MCP antes de publicar.
+- Testar as permissões pelo MCP antes de publicar: `set local role anon;`
+  (deve dar erro ou nada) e `set local role authenticated;` com
+  `select set_config('request.jwt.claims', '{"sub":"<id>"}', true);` de um
+  membro (deve funcionar).
 
 ## Convenções de código
 
@@ -221,24 +226,30 @@ navegador pegou a versão nova e não uma cópia em cache.
 Projeto `imersao-ia-db` (`ygknsbttphqnrwnywcak`, região `sa-east-1`). Cliente
 único em `src/lib/supabase.ts`, tipado com `src/types/database.ts`.
 
-O painel não tem login: fala com o banco como visitante (`anon`), usando a
-chave **publicável** que está no `.env` (feita para ficar no navegador; quem
-protege é a RLS). **Nunca** colocar a chave secreta (`service_role` /
-`sb_secret_...`) em variável `VITE_*` — tudo que começa com `VITE_` vai para a
-página.
+O painel **exige login** (Supabase Auth, e-mail e senha — módulo
+`features/acesso`). O `Porteiro` (`features/acesso/components/porteiro.tsx`)
+mostra a tela de entrada sem sessão, a de nova senha ao voltar do link de
+"Esqueci minha senha", o aviso "sem acesso" para quem não é membro, e só então
+o painel (e só então chama `iniciar()`). A chave do `.env` continua sendo a
+**publicável** (feita para ficar no navegador; quem protege é a RLS). **Nunca**
+colocar a chave secreta (`service_role` / `sb_secret_...`) em variável
+`VITE_*` — tudo que começa com `VITE_` vai para a página.
 
-As linhas compartilhadas (`usuario_id IS NULL`) aceitam **leitura e gravação
-anônimas**. Isso foi uma decisão explícita do dono, tomada depois de apresentada
-a alternativa com autenticação — está registrada em
-`supabase/migrations/20260917000000_permitir_gravacao_anonima_nos_dados_compartilhados.sql`,
-junto com a consequência (os dados são graváveis por qualquer um que tenha o
-endereço) e o caminho de volta (autenticar, mesmo que anonimamente, e voltar às
-políticas por dono). Não reverter isso sem ele pedir. Toda consulta do painel
-filtra `.is('usuario_id', null)`.
+Os dados da casa são as linhas compartilhadas (`usuario_id IS NULL`). Desde
+`supabase/migrations/20261005234904_login_obrigatorio.sql` elas só são lidas e
+gravadas por usuário **logado e membro**: e-mail confirmado e presente em
+`acesso.membros` (schema `acesso`, fora da API). As políticas usam
+`(usuario_id is null and (select acesso.e_membro())) or (select auth.uid()) = usuario_id`.
+O papel `anon` não tem mais permissão em tabela nenhuma. O site pergunta
+`supabase.rpc('tenho_acesso')` para decidir entre o painel e o aviso.
+Autorizar alguém: `insert into acesso.membros (email) values ('...')` (minúsculas).
+A decisão anterior (gravação anônima, de 17/09/2026) foi revertida a pedido do
+dono. Toda consulta do painel continua filtrando `.is('usuario_id', null)`.
 
-Só `competencias`, `faturas`, `lancamentos` e `agendamentos` (esta pela janela
-`public.agendamentos`, sobre `agenda.agendamentos`) estão abertas para escrita. `categorias`, `contas`, `cartoes`, `regras_categorizacao` e `perfis`
-seguem somente-leitura para o visitante.
+`competencias`, `faturas`, `lancamentos` e `agendamentos` (esta pela janela
+`public.agendamentos`, sobre `agenda.agendamentos`) aceitam escrita do membro.
+`categorias`, `contas`, `cartoes`, `regras_categorizacao` e `perfis` seguem
+somente-leitura para os dados compartilhados.
 
 Deduplicação: `lancamentos` tem índice único em
 `(competencia_id, origem, data, descricao, valor)` e `agendamentos` em
@@ -253,11 +264,12 @@ um lançamento e editar regras de categorização afetam só o navegador.
 
 ### Auth, Storage e Edge Functions (prontos para usar)
 
-- **Auth**: o cliente já guarda e renova sessão. `useSessao()`
-  (`src/hooks/use-sessao.ts`) diz quem está logado. Módulo com dado pessoal
-  deve gravar `usuario_id = auth.uid()` e usar as políticas "dono lê/escreve"
-  que já existem nas tabelas. Ligar login no painel atual muda a decisão acima
-  — só com pedido do dono.
+- **Auth**: login por e-mail e senha, ligado (ver acima). `useSessao()`
+  (`src/hooks/use-sessao.ts`) diz quem está logado. Contas são criadas pelo
+  dono no painel do Supabase (Authentication → Users → Add user, com
+  "Auto Confirm"); passo a passo em `docs/login-e-credenciais.md`. O link de
+  "Esqueci minha senha" volta para `window.location.origin`, que precisa estar
+  em Authentication → URL Configuration (Site URL / Redirect URLs).
 - **Storage**: para guardar arquivos (ex.: PDFs de extrato), criar um bucket
   **privado** por migração, com políticas em `storage.objects` por
   `bucket_id` e dono; no front, `supabase.storage.from('<bucket>')`. Hoje o
@@ -309,10 +321,13 @@ categoria resolvida, como `vw_lancamentos_detalhados` faz com os lançamentos.
 O Supabase é bloqueado pelo proxy deste ambiente, então:
 
 - para testar o **fluxo do site**, interceptar com `page.route('**/rest/v1/**')`
-  e conferir método, caminho e corpo das requisições;
-- para testar **permissões do banco**, rodar SQL com `set local role anon;` pelo
-  MCP do Supabase — é o mesmo papel que o site usa — e limpar os dados de teste
-  depois.
+  e `page.route('**/auth/v1/**')` (login: responder ao
+  `token?grant_type=password` com uma sessão falsa; `rpc/tenho_acesso` com
+  `true`) e conferir método, caminho e corpo das requisições;
+- para testar **permissões do banco**, rodar SQL pelo MCP do Supabase com
+  `set local role authenticated;` + `request.jwt.claims` de um membro (é o
+  papel que o site usa depois do login) e com `set local role anon;` (deve
+  ser barrado), e limpar os dados de teste depois.
 
 Conferir sempre o resultado por screenshot, nos modos claro e escuro, no
 celular (390 px, sem rolagem lateral) e nos casos de borda (um mês só, nenhum

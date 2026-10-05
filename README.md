@@ -8,6 +8,16 @@ agenda do que ainda vai acontecer.
 
 ## O que o sistema faz
 
+**Entrar (login)**
+- O painel pede e-mail e senha (Supabase Auth). Sem entrar, não aparece nada
+  e o banco não entrega dado nenhum.
+- Só entra nos dados da casa quem está na lista de membros
+  (`acesso.membros`). Uma conta fora da lista vê o aviso "Esta conta ainda não
+  tem acesso".
+- *Esqueci minha senha* manda um link por e-mail para criar uma senha nova.
+- Botão *Sair* no topo. Passo a passo de contas e credenciais em
+  [`docs/login-e-credenciais.md`](docs/login-e-credenciais.md).
+
 **Painel do mês**
 - Troque de mês pelas setas do topo, pela lista, pelas teclas ← → ou clicando
   no mês no gráfico do ano. O painel abre no mês mais recente.
@@ -104,7 +114,7 @@ Supabase, crie um `.env.local` com `VITE_SUPABASE_URL` e
 ```
 src/
   pages/             páginas (uma por endereço)
-  features/          um módulo por assunto: financas, painel, importacao, agenda
+  features/          um módulo por assunto: acesso (login), financas, painel, importacao, agenda
   components/ui/     componentes base (botão, cartão, seletor, abas, diálogo...)
   components/layout/ cabeçalho, rodapé, avisos
   lib/               conexão com o Supabase, datas, formatação
@@ -120,17 +130,22 @@ passo a passo para criar módulos novos e rotina de publicação em
 
 ## Segurança — leia antes de usar com dados reais
 
-O painel não tem login. Por decisão do dono do projeto, os dados
-compartilhados podem ser **lidos e alterados por qualquer pessoa que tenha o
-endereço do site**. Serve para estudo e dados fictícios. Para dados reais, o
-caminho é ligar o login do Supabase (a estrutura já está pronta) e voltar às
-regras "cada um vê só o que é seu" — está descrito na migração
-`20260917000000_permitir_gravacao_anonima_nos_dados_compartilhados.sql`.
+O painel exige login. Os dados da casa (linhas com `usuario_id` nulo) só são
+lidos e gravados por quem entrou **e** está na lista `acesso.membros`; o
+visitante sem login não lê nem grava nada (migração
+`20261005234904_login_obrigatorio.sql`). A chave que fica no site
+(`VITE_SUPABASE_PUBLISHABLE_KEY`) é a publicável, feita para ser pública; a
+chave secreta nunca vai para o site. Detalhes e passo a passo em
+[`docs/login-e-credenciais.md`](docs/login-e-credenciais.md).
 
 Limitações conhecidas: excluir um lançamento e editar regras de categorização
 valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
+
+- **05/10/2026 — `v05/10/2026-e`**: login obrigatório (e-mail e senha do
+  Supabase), lista de membros da casa, "Esqueci minha senha" e botão *Sair*.
+  O acesso sem login aos dados foi fechado.
 
 - **05/10/2026 — `v05/10/2026-b`**: textos da one page em linguagem simples,
   ícones em relevo e botões que abrem o WhatsApp.

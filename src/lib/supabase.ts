@@ -11,9 +11,9 @@ if (!url || !chave) {
 /**
  * Cliente único do Supabase para o app inteiro — nunca crie outro.
  *
- * Usa a chave PUBLICÁVEL: quem protege os dados é a RLS do banco. Sem login,
- * as requisições saem com o papel `anon`; quando houver login (Supabase Auth),
- * o mesmo cliente passa a mandar o token do usuário sozinho.
+ * Usa a chave PUBLICÁVEL: quem protege os dados é a RLS do banco. Depois do
+ * login (Supabase Auth), o cliente manda o token do usuário sozinho em cada
+ * requisição; sem login (papel `anon`) o banco não entrega nada.
  */
 export const supabase = createClient<Database>(url, chave, {
   auth: {

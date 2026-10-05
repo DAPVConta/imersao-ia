@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 /**
- * Sessão do Supabase Auth (quem está logado). Pronto para os módulos que
- * precisarem de login. Hoje o painel funciona SEM login (papel `anon`), por
- * decisão do dono — ver CLAUDE.md, seção "Banco de dados".
+ * Sessão do Supabase Auth (quem está logado). O painel exige login: sem
+ * sessão, o Porteiro (features/acesso) mostra a tela de entrada.
  *
  * `sessao` é undefined enquanto carrega e null quando ninguém está logado.
  */

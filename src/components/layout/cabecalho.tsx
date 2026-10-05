@@ -5,9 +5,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BotaoSair } from '@/features/acesso/components/botao-sair'
 import { criarMes, exportarBackup, importarBackup } from '@/features/financas/acoes'
 import { irParaMes, vizinhos } from '@/features/financas/navegacao'
 import { useFinancas } from '@/features/financas/store'
+import { useSessao } from '@/hooks/use-sessao'
 import { useTema } from '@/hooks/use-tema'
 import { mesPorExtenso } from '@/lib/formato-mes'
 import { Logo } from './logo'
@@ -26,6 +28,7 @@ export function Cabecalho() {
   const meses = useFinancas((e) => e.base.months)
   const mesAtual = useFinancas((e) => e.mesAtual)
   const { tema, alternar } = useTema()
+  const { usuario } = useSessao()
   const arquivo = useRef<HTMLInputElement>(null)
   const [novoMesAberto, setNovoMesAberto] = useState(false)
   const [novoMes, setNovoMes] = useState('')
@@ -96,6 +99,7 @@ export function Cabecalho() {
           <Button variant="default" onClick={irParaLancamento} className="ml-2">
             <Plus /> Lançar
           </Button>
+          <BotaoSair variant="ghost" size="sm" email={usuario?.email} className="ml-1" />
           <input
             ref={arquivo} type="file" accept="application/json" className="hidden"
             onChange={(e) => {

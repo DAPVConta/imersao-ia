@@ -2,10 +2,10 @@
  * Tudo que fala com o Supabase sobre finanças fica aqui — componentes nunca
  * chamam `supabase.from(...)` direto.
  *
- * O painel usa o papel `anon` e trabalha nas linhas COMPARTILHADAS
- * (usuario_id nulo), que aceitam leitura e gravação anônimas por decisão do
- * dono (ver supabase/migrations/20260917000000_...). Toda consulta filtra
- * `usuario_id is null` para não misturar com dados de usuários logados.
+ * O painel exige login e trabalha nas linhas COMPARTILHADAS da casa
+ * (usuario_id nulo), que só os membros (acesso.membros) leem e gravam — ver
+ * supabase/migrations/20261005234904_login_obrigatorio.sql. Toda consulta
+ * filtra `usuario_id is null` para não misturar com dados pessoais.
  */
 import { dataBr, dataIso } from '@/lib/datas'
 import { erroDoBanco, supabase } from '@/lib/supabase'

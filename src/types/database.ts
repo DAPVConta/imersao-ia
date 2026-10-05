@@ -591,7 +591,7 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      tenho_acesso: { Args: never; Returns: boolean }
     }
     Enums: {
       natureza_categoria: "receita" | "despesa" | "transferencia"
