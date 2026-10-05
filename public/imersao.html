@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Imersão em IA 3ª Turma</title>
+<meta name="description" content="Chamada para a 3ª turma da Imersão em IA: do zero ao primeiro sistema publicado na internet, sem escrever código.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,100&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  /* Layout: uma coluna de leitura (max 1040px), alinhada à esquerda. Tudo é
+     moldado a partir de uma única superfície (neumorphism): relevo para o que
+     se destaca, baixo-relevo para o que se lê e se escolhe. A ousadia fica em
+     dois lugares: o "3" em baixo-relevo do topo e o visor do investimento. */
+  :root {
+    --base: #e3e7ee;
+    --sombra: #b7bec9;
+    --luz: #ffffff;
+    --tinta: #182238;
+    --tinta-2: #4f5a70;
+    --tinta-suave: #7c8699;
+    --ouro: #a8822f;
+    --ouro-claro: #d9c08a;
+    --verde: #257d66;
+    --fonte-titulo: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --fonte-texto: "Manrope", "Segoe UI", Helvetica, Arial, sans-serif;
+    --raio: 28px;
+    --raio-p: 16px;
+    --alto: 10px 10px 24px var(--sombra), -10px -10px 24px var(--luz);
+    --alto-p: 5px 5px 12px var(--sombra), -5px -5px 12px var(--luz);
+    --baixo: inset 6px 6px 14px var(--sombra), inset -6px -6px 14px var(--luz);
+    --baixo-p: inset 3px 3px 7px var(--sombra), inset -3px -3px 7px var(--luz);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --base: #272c37; --sombra: #1a1e26; --luz: #353c4a;
+      --tinta: #edf0f6; --tinta-2: #b4bccb; --tinta-suave: #8993a6;
+      --ouro: #d7b15b; --ouro-claro: #6b5a30; --verde: #5cc2a3;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --base: #272c37; --sombra: #1a1e26; --luz: #353c4a;
+    --tinta: #edf0f6; --tinta-2: #b4bccb; --tinta-suave: #8993a6;
+    --ouro: #d7b15b; --ouro-claro: #6b5a30; --verde: #5cc2a3;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--base);
+    color: var(--tinta);
+    font-family: var(--fonte-texto);
+    font-size: 17px;
+    line-height: 1.6;
+    padding-block: 40px 72px;
+    padding-inline: clamp(16px, 4vw, 48px);
+    -webkit-font-smoothing: antialiased;
+  }
+  .pagina { max-width: 1040px; margin-inline: auto; display: grid; gap: 72px; }
+  h1, h2, h3 { font-family: var(--fonte-titulo); font-weight: 600; line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(38px, 6vw, 68px); font-variation-settings: "opsz" 144, "SOFT" 100; }
+  h2 { font-size: clamp(28px, 3.6vw, 40px); font-variation-settings: "opsz" 72, "SOFT" 100; }
+  h3 { font-size: 22px; font-variation-settings: "opsz" 36, "SOFT" 100; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .lead { font-size: clamp(18px, 2.1vw, 21px); color: var(--tinta-2); max-width: 36em; }
+  .texto { color: var(--tinta-2); max-width: 38em; }
+  :focus-visible { outline: 3px solid var(--ouro); outline-offset: 4px; border-radius: 8px; }
+
+  /* Superfícies */
+  .placa { background: var(--base); border-radius: var(--raio); box-shadow: var(--alto); }
+  .poco  { background: var(--base); border-radius: var(--raio-p); box-shadow: var(--baixo); }
+
+  /* Botão */
+  .botao {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 56px; padding: 14px 28px; border-radius: 999px;
+    font: 700 16px/1 var(--fonte-texto); color: var(--tinta); text-decoration: none;
+    background: var(--base); box-shadow: var(--alto-p); border: 0; cursor: pointer;
+    transition: box-shadow .18s ease, transform .18s ease;
+  }
+  .botao:hover { box-shadow: var(--alto); }
+  .botao:active { box-shadow: var(--baixo-p); transform: translateY(1px); }
+  .botao--ouro { color: var(--ouro); }
+  .botao--secundario { font-weight: 600; color: var(--tinta-2); }
+
+  /* Topo */
+  .topo { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px 56px; align-items: center; padding: clamp(28px, 5vw, 56px); }
+  .topo__texto { display: grid; gap: 24px; min-width: 0; }
+  .chamada { display: inline-flex; align-items: center; gap: 12px; color: var(--ouro); font-weight: 700; font-size: 15px; }
+  .chamada__ponto { width: 10px; height: 10px; border-radius: 50%; background: var(--ouro); box-shadow: 0 0 0 4px var(--base), 0 0 0 5px var(--ouro-claro); }
+  .acoes { display: flex; flex-wrap: wrap; gap: 16px; }
+  .turma {
+    width: clamp(180px, 22vw, 240px); aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center; text-align: center; box-shadow: var(--baixo);
+    justify-self: end;
+  }
+  .turma__num { font-family: var(--fonte-titulo); font-weight: 700; font-size: clamp(88px, 11vw, 124px); line-height: 1; color: var(--ouro); font-variation-settings: "opsz" 144, "SOFT" 100; }
+  .turma__num sup { font-size: .32em; vertical-align: top; position: relative; top: .25em; font-weight: 500; }
+  .turma__rot { font-size: 14px; font-weight: 700; color: var(--tinta-2); margin-top: -6px; }
+
+  /* Fatos rápidos */
+  .fatos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .fato { padding: 22px 24px; display: grid; gap: 4px; }
+  .fato__valor { font-family: var(--fonte-titulo); font-size: 30px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .fato__rot { color: var(--tinta-2); font-size: 15px; }
+
+  /* Seções */
+  .secao { display: grid; gap: 28px; }
+  .secao__cabeca { display: grid; gap: 12px; }
+  .traco { width: 56px; height: 6px; border-radius: 999px; background: var(--ouro); box-shadow: var(--alto-p); }
+
+  .objetivo { padding: clamp(28px, 5vw, 56px); display: grid; gap: 20px; }
+  .objetivo h2 { font-size: clamp(26px, 3.2vw, 36px); max-width: 24em; }
+
+  .tres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .bloco { padding: 28px; display: grid; gap: 12px; align-content: start; }
+  .bloco p { color: var(--tinta-2); font-size: 16px; }
+  .ferramentas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .chip { padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--tinta-2); box-shadow: var(--baixo-p); }
+
+  /* Jornada */
+  .jornada { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; padding: clamp(24px, 4vw, 44px); }
+  .etapa { display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .etapa__marca { display: flex; align-items: center; gap: 12px; }
+  .etapa__bola { width: 44px; height: 44px; border-radius: 50%; flex: none; display: grid; place-items: center; box-shadow: var(--alto-p); font-family: var(--fonte-titulo); font-weight: 700; font-size: 20px; color: var(--ouro); }
+  .etapa__bola--gravada { color: var(--verde); }
+  .etapa__linha { flex: 1; height: 6px; border-radius: 999px; box-shadow: var(--baixo-p); }
+  .etapa:last-child .etapa__linha { visibility: hidden; }
+  .etapa__tipo { font-size: 13px; font-weight: 700; color: var(--ouro); }
+  .etapa__tipo--gravada { color: var(--verde); }
+  .etapa h3 { font-size: 19px; }
+  .etapa p { color: var(--tinta-2); font-size: 15px; }
+
+  /* Aulas em detalhe */
+  .aulas { display: grid; gap: 20px; }
+  .aula { padding: 28px clamp(22px, 3vw, 36px); display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 8px 24px; align-items: start; }
+  .aula__num { grid-row: span 2; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--baixo-p); font-family: var(--fonte-titulo); font-weight: 700; font-size: 32px; color: var(--ouro); }
+  .aula__num--gravada { color: var(--verde); font-size: 24px; }
+  .aula__meta { font-size: 14px; font-weight: 700; color: var(--ouro); }
+  .aula__meta--gravada { color: var(--verde); }
+  .aula__corpo { display: grid; gap: 10px; }
+  .aula ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--tinta-2); font-size: 15.5px; }
+  .aula li { position: relative; padding-left: 18px; }
+  .aula li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--ouro); }
+  .aula details summary { cursor: pointer; font-weight: 700; color: var(--tinta-2); font-size: 15px; list-style: none; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; box-shadow: var(--alto-p); user-select: none; margin-top: 6px; }
+  .aula details summary::-webkit-details-marker { display: none; }
+  .aula details[open] summary { box-shadow: var(--baixo-p); }
+  .aula details summary::after { content: "ver conteúdo"; }
+  .aula details[open] summary::after { content: "esconder conteúdo"; }
+
+  /* Entregáveis */
+  .leva { padding: clamp(24px, 4vw, 44px); display: grid; gap: 0; }
+  .leva__item { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 18px 0; border-top: 1px solid color-mix(in srgb, var(--sombra) 70%, transparent); }
+  .leva__item:first-child { border-top: 0; padding-top: 0; }
+  .leva__item:last-child { padding-bottom: 0; }
+  .leva__ok { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--baixo-p); color: var(--verde); }
+  .leva__txt { font-weight: 600; }
+  .leva__aula { color: var(--tinta-suave); font-size: 14px; white-space: nowrap; }
+
+  /* Investimento */
+  .invest { padding: clamp(28px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+  .invest__texto { display: grid; gap: 20px; }
+  .visor { padding: clamp(24px, 4vw, 40px); display: grid; gap: 14px; text-align: center; }
+  .visor__rot { font-size: 14px; font-weight: 700; color: var(--tinta-2); }
+  .visor__preco { font-family: var(--fonte-titulo); font-weight: 700; font-size: clamp(56px, 8vw, 84px); line-height: 1; color: var(--tinta); font-variant-numeric: tabular-nums; font-variation-settings: "opsz" 144, "SOFT" 100; }
+  .visor__preco small { font-size: .42em; font-weight: 500; color: var(--tinta-2); vertical-align: top; position: relative; top: .35em; margin-right: .15em; }
+  .visor__parcela { font-size: 17px; color: var(--tinta-2); }
+  .visor__parcela strong { color: var(--tinta); }
+  .visor__nota { font-size: 13px; color: var(--tinta-suave); }
+  .visor .botao { margin-top: 8px; justify-self: center; }
+  .inclui { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; color: var(--tinta-2); }
+  .inclui li { display: flex; gap: 12px; align-items: flex-start; }
+  .inclui svg { flex: none; margin-top: 4px; color: var(--verde); }
+
+  /* Fecho */
+  .fecho { display: grid; gap: 20px; padding: clamp(28px, 5vw, 56px); text-align: left; }
+  .fecho h2 { font-size: clamp(30px, 4.2vw, 48px); max-width: 16em; }
+  .rodape { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--tinta-suave); font-size: 14px; padding-top: 8px; }
+
+  @media (max-width: 860px) {
+    .fatos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tres { grid-template-columns: 1fr; }
+    .jornada { grid-template-columns: 1fr; gap: 28px; }
+    .etapa__linha { display: none; }
+    .invest { grid-template-columns: 1fr; }
+    .topo { grid-template-columns: 1fr; }
+    .turma { justify-self: start; }
+  }
+  @media (max-width: 480px) {
+    body { font-size: 16px; }
+    .pagina { gap: 56px; }
+    .fatos { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .fato { padding: 18px; }
+    .fato__valor { font-size: 24px; }
+    .aula { grid-template-columns: 56px minmax(0, 1fr); gap: 8px 16px; }
+    .aula__num { width: 56px; height: 56px; font-size: 26px; }
+    .leva__item { grid-template-columns: 40px minmax(0, 1fr); }
+    .leva__aula { grid-column: 2; white-space: normal; }
+    .botao { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .botao { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main class="pagina">
+
+  <header class="placa topo" id="topo">
+    <div class="topo__texto">
+      <span class="chamada"><span class="chamada__ponto" aria-hidden="true"></span>Inscrições abertas para a 3ª turma</span>
+      <h1>Imersão em IA<br>Do zero ao primeiro sistema</h1>
+      <p class="lead">Aprenda a usar a inteligência artificial no seu dia a dia e publique o seu próprio sistema na internet, sem escrever uma linha de código.</p>
+      <div class="acoes">
+        <a class="botao botao--ouro" href="#investimento">Quero minha vaga</a>
+        <a class="botao botao--secundario" href="#jornada">Ver como funciona</a>
+      </div>
+    </div>
+    <div class="turma" aria-label="Terceira turma">
+      <div>
+        <div class="turma__num">3<sup>ª</sup></div>
+        <div class="turma__rot">turma</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="fatos" aria-label="Resumo do curso">
+    <div class="poco fato"><span class="fato__valor">4</span><span class="fato__rot">encontros ao vivo</span></div>
+    <div class="poco fato"><span class="fato__valor">2 h</span><span class="fato__rot">de duração cada</span></div>
+    <div class="poco fato"><span class="fato__valor">1</span><span class="fato__rot">aula gravada de preparação</span></div>
+    <div class="poco fato"><span class="fato__valor">0</span><span class="fato__rot">linhas de código escritas por você</span></div>
+  </section>
+
+  <section class="placa objetivo" aria-labelledby="objetivo">
+    <span class="traco" aria-hidden="true"></span>
+    <p class="texto">Objetivo do programa</p>
+    <h2 id="objetivo">Ao final, cada participante terá publicado na internet um sistema próprio, com seus dados salvos com segurança e acessível de qualquer dispositivo, construído inteiramente por conversas com a IA.</h2>
+    <p class="lead">E, antes disso, já estará usando a IA como assistente pessoal para organizar a rotina e automatizar tarefas do dia a dia.</p>
+  </section>
+
+  <section class="secao" aria-labelledby="para-quem">
+    <div class="secao__cabeca">
+      <span class="traco" aria-hidden="true"></span>
+      <h2 id="para-quem">Para quem é, o que precisa e como funciona</h2>
+    </div>
+    <div class="tres">
+      <div class="placa bloco">
+        <h3>Público</h3>
+        <p>Profissionais e empreendedores sem conhecimento de programação que querem usar IA no dia a dia e criar os próprios sistemas web.</p>
+      </div>
+      <div class="placa bloco">
+        <h3>Pré-requisitos</h3>
+        <p>Computador com Google Chrome logado em uma conta Gmail e assinatura paga do Claude. Nada mais é necessário para começar.</p>
+      </div>
+      <div class="placa bloco">
+        <h3>Metodologia</h3>
+        <p>Aprendizado por prática. A aula 1 aplica a IA à rotina dos participantes; as aulas 2 a 4 constroem juntos um sistema-guia, que cada aluno pode adaptar ao seu próprio negócio.</p>
+      </div>
+    </div>
+    <div class="ferramentas" aria-label="Ferramentas usadas no curso">
+      <span class="chip">Claude Chat, Desktop e Chrome</span>
+      <span class="chip">Claude Code</span>
+      <span class="chip">GitHub</span>
+      <span class="chip">Supabase</span>
+      <span class="chip">Vercel</span>
+      <span class="chip">Sistema-guia: assistente financeiro pessoal</span>
+    </div>
+  </section>
+
+  <section class="secao" id="jornada" aria-labelledby="jornada-titulo">
+    <div class="secao__cabeca">
+      <span class="traco" aria-hidden="true"></span>
+      <h2 id="jornada-titulo">A jornada em cinco etapas</h2>
+    </div>
+    <div class="placa jornada">
+      <div class="etapa">
+        <div class="etapa__marca"><span class="etapa__bola">1</span><span class="etapa__linha" aria-hidden="true"></span></div>
+        <span class="etapa__tipo">Ao vivo</span>
+        <h3>Introdução à IA</h3>
+        <p>A IA organizando o dia a dia e automatizando operações.</p>
+      </div>
+      <div class="etapa">
+        <div class="etapa__marca"><span class="etapa__bola etapa__bola--gravada">▶</span><span class="etapa__linha" aria-hidden="true"></span></div>
+        <span class="etapa__tipo etapa__tipo--gravada">Gravada</span>
+        <h3>Preparando as ferramentas</h3>
+        <p>Contas criadas e ferramentas conectadas antes da aula 2.</p>
+      </div>
+      <div class="etapa">
+        <div class="etapa__marca"><span class="etapa__bola">2</span><span class="etapa__linha" aria-hidden="true"></span></div>
+        <span class="etapa__tipo">Ao vivo</span>
+        <h3>Primeiro sistema</h3>
+        <p>Dos seus extratos a um painel financeiro.</p>
+      </div>
+      <div class="etapa">
+        <div class="etapa__marca"><span class="etapa__bola">3</span><span class="etapa__linha" aria-hidden="true"></span></div>
+        <span class="etapa__tipo">Ao vivo</span>
+        <h3>Sistema na internet</h3>
+        <p>Base profissional e um endereço próprio na web.</p>
+      </div>
+      <div class="etapa">
+        <div class="etapa__marca"><span class="etapa__bola">4</span><span class="etapa__linha" aria-hidden="true"></span></div>
+        <span class="etapa__tipo">Ao vivo</span>
+        <h3>Dados salvos e acesso seguro</h3>
+        <p>Informações guardadas, login com senha e acesso pelo celular.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="aulas-titulo">
+    <div class="secao__cabeca">
+      <span class="traco" aria-hidden="true"></span>
+      <h2 id="aulas-titulo">O que acontece em cada aula</h2>
+    </div>
+    <div class="aulas">
+
+      <article class="placa aula">
+        <span class="aula__num">1</span>
+        <span class="aula__meta">Aula ao vivo, 2 horas</span>
+        <div class="aula__corpo">
+          <h3>Introdução à IA: organizando o dia a dia e automatizando operações</h3>
+          <p class="texto">Sair da aula com a IA instalada, conectada às suas ferramentas e já trabalhando por você.</p>
+          <details>
+            <summary></summary>
+            <ul>
+              <li>O que a IA faz bem (e mal), seus limites de uso e por que ela às vezes "esquece" a conversa</li>
+              <li>As versões do Claude e para que serve cada uma: no navegador, no computador, no Chrome e para criar documentos, designs e sistemas</li>
+              <li>Instalação guiada do Claude no computador e no Google Chrome</li>
+              <li>Conectando a IA às ferramentas que você já usa no trabalho</li>
+              <li>Construção de casos práticos para o dia a dia, aplicados à rotina dos participantes</li>
+              <li>Segurança: o que nunca compartilhar com a IA e como conceder permissões com cautela</li>
+            </ul>
+          </details>
+        </div>
+      </article>
+
+      <article class="placa aula">
+        <span class="aula__num aula__num--gravada">▶</span>
+        <span class="aula__meta aula__meta--gravada">Aula gravada, assistir antes da aula 2</span>
+        <div class="aula__corpo">
+          <h3>Preparando suas ferramentas</h3>
+          <p class="texto">Cada aluno chega à aula 2 com contas criadas, ferramentas conectadas e o checklist concluído.</p>
+          <details>
+            <summary></summary>
+            <ul>
+              <li>Como um sistema funciona: a tela que você vê, os dados guardados e o endereço na internet</li>
+              <li>As quatro ferramentas do curso: Claude Code constrói, GitHub guarda o projeto, Supabase guarda os dados e Vercel coloca o sistema no ar</li>
+              <li>Criação das contas no GitHub, Supabase e Vercel com o mesmo e-mail</li>
+              <li>Abrindo o Claude Code e criando o espaço do seu projeto</li>
+              <li>Conectando as três ferramentas ao Claude</li>
+              <li>Onde guardar senhas e códigos de acesso com segurança</li>
+              <li>Problemas comuns e como resolver: navegador, zoom da tela, endereço errado e permissões de acesso</li>
+              <li>Checklist final: tudo pronto para a aula 2</li>
+            </ul>
+          </details>
+        </div>
+      </article>
+
+      <article class="placa aula">
+        <span class="aula__num">2</span>
+        <span class="aula__meta">Aula ao vivo, 2 horas</span>
+        <div class="aula__corpo">
+          <h3>Primeiro sistema funcional</h3>
+          <p class="texto">Um painel financeiro criado a partir dos seus próprios extratos e faturas, funcionando no seu computador.</p>
+          <details>
+            <summary></summary>
+            <ul>
+              <li>Do extrato bancário e da fatura do cartão a um painel financeiro, com um único pedido à IA</li>
+              <li>Deixando a IA trabalhar sem pedir confirmação a cada passo</li>
+              <li>Instalando um pacote de habilidades de design para um visual profissional</li>
+              <li>Melhorando o visual a partir de uma imagem de referência</li>
+              <li>Boa prática: primeiro funcionar, depois ficar bonito</li>
+              <li>Frases que resolvem: "Não sou programador, explique de forma simples" e quando começar uma conversa nova</li>
+            </ul>
+          </details>
+        </div>
+      </article>
+
+      <article class="placa aula">
+        <span class="aula__num">3</span>
+        <span class="aula__meta">Aula ao vivo, 2 horas</span>
+        <div class="aula__corpo">
+          <h3>Seu sistema na internet</h3>
+          <p class="texto">O sistema ganha uma base profissional, regras que a IA sempre segue e um endereço próprio na web.</p>
+          <details>
+            <summary></summary>
+            <ul>
+              <li>Atualizando o sistema para as tecnologias mais usadas hoje no mercado, com a IA reconstruindo tudo sem você escrever código</li>
+              <li>Qual versão do Claude usar: a mais potente para tarefas complexas, a mais ágil para o dia a dia</li>
+              <li>O manual do projeto: regras que a IA consulta sempre, sem você precisar repetir</li>
+              <li>Habilidades extras para design, segurança dos dados e planejamento de novos sistemas</li>
+              <li>Dados organizados por assunto, como abas separadas de uma planilha</li>
+              <li>A IA salva cada nova versão no GitHub; versão de teste e versão oficial no Vercel</li>
+              <li>Link oficial, histórico de versões e como voltar a uma versão anterior</li>
+              <li>Logo, ícone da aba do navegador e novo visual a partir de referências</li>
+              <li>Exercício: criar uma nova parte do sistema, do planejamento até o ar</li>
+            </ul>
+          </details>
+        </div>
+      </article>
+
+      <article class="placa aula">
+        <span class="aula__num">4</span>
+        <span class="aula__meta">Aula ao vivo, 2 horas</span>
+        <div class="aula__corpo">
+          <h3>Dados salvos e acesso seguro de qualquer lugar</h3>
+          <p class="texto">Informações guardadas com segurança, acesso protegido por usuário e senha e funcionando no celular: o primeiro sistema completo.</p>
+          <details>
+            <summary></summary>
+            <ul>
+              <li>Onde encontrar o endereço e a chave de acesso dos seus dados no Supabase</li>
+              <li>Cadastrando essas informações no Vercel e atualizando o sistema no ar</li>
+              <li>Criando as tabelas de dados com um pedido à IA e conferindo o resultado</li>
+              <li>Quem pode ver o quê: as regras de proteção dos dados</li>
+              <li>Quando a tela não mostra os dados: como corrigir enviando um print à IA</li>
+              <li>Tela de acesso com usuário e senha: só entra quem você autorizar</li>
+              <li>Importando novos extratos e testando no celular</li>
+              <li>Endereço próprio (ex.: seunome.com.br) e privacidade do sistema</li>
+            </ul>
+          </details>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="leva-titulo">
+    <div class="secao__cabeca">
+      <span class="traco" aria-hidden="true"></span>
+      <h2 id="leva-titulo">O que cada aluno leva para casa</h2>
+    </div>
+    <div class="placa leva">
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Assistente pessoal configurado com pelo menos uma automação funcionando</span><span class="leva__aula">Aula 1</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Ferramentas criadas e conectadas</span><span class="leva__aula">Aula gravada</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Painel financeiro funcionando no seu computador</span><span class="leva__aula">Aula 2</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Sistema com base profissional, publicado com link próprio</span><span class="leva__aula">Aula 3</span></div>
+      <div class="leva__item"><span class="leva__ok" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><span class="leva__txt">Sistema com dados salvos e login, acessível pelo celular</span><span class="leva__aula">Aula 4</span></div>
+    </div>
+  </section>
+
+  <section class="placa invest" id="investimento" aria-labelledby="invest-titulo">
+    <div class="invest__texto">
+      <span class="traco" aria-hidden="true"></span>
+      <h2 id="invest-titulo">Investimento</h2>
+      <p class="lead">Um valor único para o programa completo, com o instrutor ao lado em cada etapa.</p>
+      <ul class="inclui">
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>4 encontros ao vivo de 2 horas</span></li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Aula gravada de preparação das ferramentas</span></li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Sistema-guia completo para adaptar ao seu negócio</span></li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Seu sistema publicado na internet ao final da imersão</span></li>
+      </ul>
+    </div>
+    <div class="poco visor">
+      <span class="visor__rot">Programa completo</span>
+      <div class="visor__preco"><small>R$</small>750</div>
+      <p class="visor__parcela">ou em até <strong>10x na maquineta</strong></p>
+      <p class="visor__nota">Parcelamento com os juros da maquineta de cartão.</p>
+      <!-- Troque o endereço abaixo pelo link de inscrição (WhatsApp, formulário ou pagamento). -->
+      <a class="botao botao--ouro" href="#topo">Garantir minha vaga na 3ª turma</a>
+    </div>
+  </section>
+
+  <section class="placa fecho" aria-labelledby="fecho-titulo">
+    <span class="traco" aria-hidden="true"></span>
+    <h2 id="fecho-titulo">Do zero ao seu primeiro sistema em quatro encontros.</h2>
+    <p class="lead">Sem programação, sem teoria em excesso. Apenas prática, com o instrutor ao lado em cada etapa.</p>
+    <div class="acoes">
+      <a class="botao botao--ouro" href="#investimento">Quero minha vaga</a>
+    </div>
+  </section>
+
+  <footer class="rodape">
+    <span>Imersão em IA, do zero ao primeiro sistema</span>
+    <span>Instrutor: Adriano Portugal</span>
+  </footer>
+
+</main>
+</body>
+</html>
