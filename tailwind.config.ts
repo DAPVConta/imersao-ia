@@ -35,6 +35,7 @@ export default {
         debit: { DEFAULT: token('debit'), deep: token('debit-deep') },
         gold: token('gold'),
         previsto: token('previsto'),
+        placa: token('placa'),
         menu: { DEFAULT: token('menu'), 2: token('menu-2'), foreground: token('on-menu'), mute: token('on-menu-mute') },
       },
       fontFamily: {

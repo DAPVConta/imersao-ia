@@ -69,7 +69,7 @@ npm run preview      # serve o dist/ em http://localhost:4173
 
 ```
 index.html                 casca HTML (Vite injeta o app aqui)
-public/                    arquivos servidos como estão (favicon.svg)
+public/                    arquivos servidos como estão (favicon.png 32 px, apple-touch-icon.png 180 px)
 docs/design.md             plano de design (paleta, fontes, layout, assinatura)
 .claude/skills/            skills do projeto (ver seção Skills)
 src/
@@ -196,6 +196,12 @@ geometria em `features/painel/guilloche.ts`).
 - Os tokens ficam em `src/index.css`, como canais RGB, com versão clara e
   escura. Um token novo precisa entrar **nos três blocos** (claro, escuro
   forçado e escuro automático) e em `tailwind.config.ts`. Não usar `dark:`.
+- Marca: `Logo` (só o símbolo, `src/assets/marca/simbolo.png`) e
+  `LogoCompleto` (símbolo + nome, `logo-completo.png`), em
+  `components/layout/logo.tsx`. O nome no logotipo é azul-marinho: o completo
+  só vai em fundo claro (fica sobre `bg-placa`, que é clara nos dois temas).
+  Originais no Storage do Supabase (bucket público `logo`); as cópias do site
+  são versões reduzidas (de 1,2 MB para poucos KB).
 - Fonte: **Public Sans** só. Valores sempre com a classe `num`.
 - Proibido (vícios de design genérico apontados pela skill): rótulos em
   CAIXA-ALTA espaçada, "A · B · C", fonte monoespaçada em rótulo, `→` em

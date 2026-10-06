@@ -148,6 +148,9 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **06/10/2026 — `v06/10/2026-b`**: logotipo e favicon novos (símbolo de
+  barras subindo com moeda). Logotipo completo na tela de entrada; símbolo no
+  menu, na barra do celular, na aba do navegador e no atalho do celular.
 - **06/10/2026 — `v06/10/2026-a`**: o layout novo (menu à esquerda,
   `v29/09/2026-c`) volta ao ar junto com o login — ele tinha ficado fora do
   ramo de produção. Tela de entrada no mesmo visual; *Sair* no menu.

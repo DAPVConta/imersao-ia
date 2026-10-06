@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Logo } from '@/components/layout/logo'
+import { Logo, LogoCompleto } from '@/components/layout/logo'
 import { VERSAO_APP } from '@/lib/versao'
 import { Selo } from './selo'
 
@@ -28,6 +28,8 @@ export function Moldura({ titulo, dica, children }: { titulo: string; dica: Reac
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
         <section aria-labelledby="titulo-acesso" className="w-full max-w-[420px] rounded-lg border border-rule bg-sheet p-6 shadow-nota sm:p-8">
+          {/* -ml-2: a placa tem respiro interno; assim o desenho alinha com o título. */}
+          <LogoCompleto className="-ml-2 mb-5 h-[84px]" />
           <h1 id="titulo-acesso" className="text-[24px] font-semibold leading-tight tracking-[-.015em] text-ink">
             {titulo}
           </h1>
