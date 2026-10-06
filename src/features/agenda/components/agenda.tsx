@@ -18,12 +18,19 @@ import { filtrarAgenda, ordenarAgenda, resumirAgenda, type FiltroAgenda } from '
 import type { Agendamento } from '../tipos'
 import { FormAgendar } from './form-agendar'
 
-function Numero({ rotulo, valor, rodape, tom }: { rotulo: string; valor: ReactNode; rodape: ReactNode; tom?: 'bom' | 'ruim' }) {
+const TOM_NUMERO = {
+  ruim: 'bg-debit/10 text-debit-deep',
+  bom: 'bg-credit/10 text-credit-deep',
+  neutro: 'bg-accent/10 text-ink',
+} as const
+
+/** Um número da agenda, num bloco de cor suave. */
+function Numero({ rotulo, valor, rodape, tom = 'neutro' }: { rotulo: string; valor: ReactNode; rodape: ReactNode; tom?: keyof typeof TOM_NUMERO }) {
   return (
-    <div className="min-w-[140px]">
-      <dt className="text-[13px] text-ink-mute">{rotulo}</dt>
-      <dd className={cn('num text-[20px] font-semibold', tom === 'bom' && 'text-credit-deep', tom === 'ruim' && 'text-debit-deep')}>{valor}</dd>
-      <dd className="text-[12.5px] text-ink-mute">{rodape}</dd>
+    <div className={cn('rounded-md px-4 py-3.5', TOM_NUMERO[tom])}>
+      <dt className="text-[13px] opacity-80">{rotulo}</dt>
+      <dd className="num text-[22px] font-semibold leading-tight tracking-[-.01em]">{valor}</dd>
+      <dd className="mt-0.5 text-[12.5px] opacity-80">{rodape}</dd>
     </div>
   )
 }
@@ -148,14 +155,14 @@ export function Agenda({ agenda, mesAtual, saldoDoMes }: { agenda: Agendamento[]
         dica="Contas a pagar e dinheiro a receber. Esperam aqui, fora dos totais, e só entram no mês quando você marca que aconteceu."
         acao={<Button variant="outline" onClick={() => setAgendando(true)}><Plus /> Agendar</Button>}
       >
-        Agenda
+        O que está previsto
       </CardTitle>
 
-      <dl className="mb-6 flex flex-wrap gap-x-10 gap-y-4">
+      <dl className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Numero rotulo="A pagar" valor={fmtBRL(resumo.aPagar30)} rodape="nos próximos 30 dias" tom="ruim" />
         <Numero rotulo="A receber" valor={fmtBRL(resumo.aReceber30)} rodape="nos próximos 30 dias" tom="bom" />
         <Numero
-          rotulo="Passou da data" valor={resumo.atrasados} tom={resumo.atrasados ? 'ruim' : undefined}
+          rotulo="Passou da data" valor={resumo.atrasados} tom={resumo.atrasados ? 'ruim' : 'neutro'}
           rodape={resumo.atrasados ? `${fmtBRL(resumo.valorAtrasado)} esperando confirmação` : 'nada atrasado'}
         />
         <Numero

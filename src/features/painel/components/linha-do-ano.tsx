@@ -24,7 +24,17 @@ export function LinhaDoAno({ serie, mesAtual }: { serie: PontoMensal[]; mesAtual
 
   return (
     <Card>
-      <CardTitle dica="Entradas para cima, saídas para baixo. Clique num mês para abri-lo.">O ano mês a mês</CardTitle>
+      <CardTitle
+        dica="Entradas para cima, saídas para baixo. Clique num mês para abri-lo."
+        acao={
+          <span className="flex items-center gap-4 text-[12.5px] text-ink-mute">
+            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-credit" />Entrou</span>
+            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-debit" />Saiu</span>
+          </span>
+        }
+      >
+        O ano mês a mês
+      </CardTitle>
       <div className="-mx-1 overflow-x-auto px-1">
         <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block" role="group" aria-label="Entradas e saídas por mês">
           <line x1="0" x2={serie.length * COL} y1={MEIO} y2={MEIO} stroke="rgb(var(--rule-strong))" />

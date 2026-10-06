@@ -22,7 +22,7 @@ export function ContaECartao({ mes }: { mes: Mes }) {
   const usoLimite = card.limiteTotal && card.total != null ? (card.total / card.limiteTotal) * 100 : null
 
   return (
-    <Card className="lg:border-t-0 lg:pt-0">
+    <Card>
       <CardTitle>Conta e cartão</CardTitle>
 
       <h3 className="text-[13px] font-medium text-ink-mute">Conta corrente</h3>

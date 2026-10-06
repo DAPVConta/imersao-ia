@@ -15,16 +15,21 @@ agenda do que ainda vai acontecer.
   (`acesso.membros`). Uma conta fora da lista vê o aviso "Esta conta ainda não
   tem acesso".
 - *Esqueci minha senha* manda um link por e-mail para criar uma senha nova.
-- Botão *Sair* no topo. Passo a passo de contas e credenciais em
+- Botão *Sair* no fim do menu (no celular, no topo). Passo a passo de contas e credenciais em
   [`docs/login-e-credenciais.md`](docs/login-e-credenciais.md).
 
+**Navegação**
+- Menu à esquerda (barra de baixo no celular) com quatro páginas: Painel,
+  Agenda, Lançamentos e Trazer lançamentos.
+- Troque de mês na barra do topo (setas, lista ou teclas ← →) ou clicando no
+  mês no gráfico do ano; vale para todas as páginas. Abre no mês mais recente.
+
 **Painel do mês**
-- Troque de mês pelas setas do topo, pela lista, pelas teclas ← → ou clicando
-  no mês no gráfico do ano. O painel abre no mês mais recente.
-- **Cédula do mês:** quanto sobrou (ou faltou), o que entrou e saiu, a
-  comparação com o mês anterior e a previsão contando a agenda. O rendilhado
-  (guilhochê, como o das notas de dinheiro) muda de desenho a cada mês e o anel
-  em volta mostra quanto da receita sobrou.
+- **Resultado do mês:** quanto sobrou (ou faltou), o que entrou e saiu, a
+  comparação com o mês anterior, quanto do que entrou foi gasto e a previsão
+  contando a agenda. O guilhochê (rendilhado das notas) muda a cada mês.
+- **Indicadores:** entrou, saiu, guardado e a pagar em 30 dias, cada um com
+  a variação em relação ao mês anterior e a tendência dos últimos meses.
 - **O ano mês a mês:** entradas para cima, saídas para baixo, com a média de
   gastos.
 - **Para onde foi o dinheiro:** despesas por categoria, da maior para a menor.
@@ -77,9 +82,9 @@ quando alguém anexa um arquivo. Fontes servidas pelo próprio site, sem CDN.
 
 ## Design
 
-A identidade visual vem do dinheiro impresso: papel-moeda levemente
-esverdeado, tinta verde-pinho, as cores das cédulas de real nas categorias e o
-guilhochê das notas como assinatura. As decisões (paleta, fontes, layout, o
+Painel com menu à esquerda e cartões; a identidade vem do dinheiro impresso:
+azul-petróleo da nota de R$ 100, verde de entrada, carmim de saída, as cores
+das cédulas nas categorias e o guilhochê das notas como marca-d'água. As decisões (paleta, fontes, layout, o
 que evitar) estão em [`docs/design.md`](docs/design.md).
 
 ## Skills do projeto
@@ -143,15 +148,21 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **06/10/2026 — `v06/10/2026-a`**: o layout novo (menu à esquerda,
+  `v29/09/2026-c`) volta ao ar junto com o login — ele tinha ficado fora do
+  ramo de produção. Tela de entrada no mesmo visual; *Sair* no menu.
 - **05/10/2026 — `v05/10/2026-e`**: login obrigatório (e-mail e senha do
   Supabase), lista de membros da casa, "Esqueci minha senha" e botão *Sair*.
   O acesso sem login aos dados foi fechado.
-
 - **05/10/2026 — `v05/10/2026-b`**: textos da one page em linguagem simples,
   ícones em relevo e botões que abrem o WhatsApp.
 - **05/10/2026 — `v05/10/2026-a`**: página de chamada da 3ª turma da
   Imersão em IA em `/imersao.html` (estilo neumorphism, com programa, jornada,
   o que o aluno leva e investimento). Skill `find-skills` instalada.
+- **29/09/2026 — `v29/09/2026-c`**: layout novo — menu fixo à esquerda,
+  páginas separadas (Painel, Agenda, Lançamentos, Trazer lançamentos), faixa
+  de resultado com o guilhochê como marca-d'água e indicadores com variação e
+  tendência. Plano em `docs/design.md`.
 - **29/09/2026 — `v29/09/2026-b`**: agenda de pagamentos e recebimentos —
   botão *Agendar* (uma vez ou todo mês) e confirmação com a data e o valor
   reais. A agenda passou a ter um compartimento próprio no banco (schema

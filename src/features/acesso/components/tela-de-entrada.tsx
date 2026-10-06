@@ -54,9 +54,9 @@ export function TelaDeEntrada() {
         ? 'Use o e-mail e a senha da sua conta no painel.'
         : 'Digite o e-mail da sua conta. Mandamos um link para você escolher uma senha nova.'}
     >
-      {erro && <Alert variant="erro">{erro}</Alert>}
+      {erro && <Alert variant="erro" className="mb-5 bg-sheet-2 shadow-none">{erro}</Alert>}
       {linkEnviado && (
-        <Alert variant="ok">
+        <Alert variant="ok" className="mb-5 bg-sheet-2 shadow-none">
           Se esse e-mail tiver conta, o link chega em alguns minutos. Confira também a caixa de spam.
         </Alert>
       )}

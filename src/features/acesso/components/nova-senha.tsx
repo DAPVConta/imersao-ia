@@ -36,7 +36,7 @@ export function NovaSenha({ email }: { email: string }) {
 
   return (
     <Moldura titulo="Escolha sua senha nova" dica={<>Conta {email}. Use pelo menos {MINIMO} caracteres.</>}>
-      {erro && <Alert variant="erro">{erro}</Alert>}
+      {erro && <Alert variant="erro" className="mb-5 bg-sheet-2 shadow-none">{erro}</Alert>}
       <form onSubmit={enviar} className="grid gap-4">
         {/* Campo escondido: ajuda o gerenciador de senhas a saber de qual conta é a senha. */}
         <input type="email" autoComplete="username" value={email} readOnly hidden />

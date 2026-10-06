@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
-  Tokens de cor — identidade "cédula de real" (ver docs/design.md).
+  Tokens de cor — painel "extrato moderno" (ver docs/design.md).
   Cores usadas pelo Tailwind ficam como canais RGB ("23 48 43") para aceitar
   opacidade (bg-credit/10). As de categoria ficam em hex (só usadas via var()).
 
@@ -14,15 +14,16 @@
 @layer base {
   :root {
     color-scheme: light;
-    --paper: 232 236 230; --paper-2: 222 227 220;
-    --sheet: 248 249 245; --sheet-2: 239 242 236;
-    --ink: 23 48 43; --ink-2: 62 85 80; --ink-mute: 95 114 108;
-    --rule: 211 218 209; --rule-strong: 181 192 180;
-    --credit: 30 122 85; --credit-deep: 21 92 64;
-    --debit: 163 50 74; --debit-deep: 130 35 58;
-    --accent: 94 79 162; --accent-deep: 70 58 128; --on-accent: 255 255 255;
-    --gold: 156 122 43;
-    --shadow-note: 0 1px 0 rgba(23,48,43,.05), 0 18px 40px -24px rgba(23,48,43,.35);
+    --paper: 243 245 248; --paper-2: 233 237 242;
+    --sheet: 255 255 255; --sheet-2: 247 249 251;
+    --ink: 20 33 51; --ink-2: 71 85 105; --ink-mute: 112 126 146;
+    --rule: 228 232 238; --rule-strong: 200 208 219;
+    --credit: 22 163 106; --credit-deep: 9 122 78;
+    --debit: 220 62 84; --debit-deep: 176 38 60;
+    --accent: 20 98 140; --accent-deep: 14 74 108; --on-accent: 255 255 255;
+    --previsto: 106 84 196; --gold: 199 126 20;
+    --menu: 12 36 58; --menu-2: 20 52 80; --on-menu: 236 242 247; --on-menu-mute: 150 172 192;
+    --shadow-note: 0 1px 2px rgba(20,33,51,.04), 0 6px 20px -8px rgba(20,33,51,.12);
     --cat-moradia: #2f6e8f; --cat-alimentacao: #c7772a; --cat-mercado: #3f8a4f;
     --cat-transporte: #a88a2e; --cat-saude: #9a4f8c; --cat-assinaturas: #3f8e8a;
     --cat-lazer: #6b5ab0; --cat-educacao: #b0473e; --cat-outros: #7c8a85;
@@ -30,15 +31,16 @@
 
   :root[data-theme='dark'] {
     color-scheme: dark;
-    --paper: 14 26 24; --paper-2: 19 34 31;
-    --sheet: 21 36 31; --sheet-2: 27 45 40;
-    --ink: 228 235 227; --ink-2: 179 194 188; --ink-mute: 138 156 150;
-    --rule: 36 55 47; --rule-strong: 52 73 63;
-    --credit: 79 191 140; --credit-deep: 125 214 173;
-    --debit: 224 112 138; --debit-deep: 238 154 174;
-    --accent: 165 151 232; --accent-deep: 195 184 242; --on-accent: 20 16 42;
-    --gold: 214 178 94;
-    --shadow-note: 0 1px 0 rgba(0,0,0,.4), 0 24px 48px -28px rgba(0,0,0,.8);
+    --paper: 14 20 30; --paper-2: 21 29 42;
+    --sheet: 23 32 46; --sheet-2: 30 41 58;
+    --ink: 230 236 243; --ink-2: 178 190 206; --ink-mute: 132 146 165;
+    --rule: 40 52 70; --rule-strong: 58 73 94;
+    --credit: 62 196 138; --credit-deep: 118 222 174;
+    --debit: 236 98 118; --debit-deep: 245 150 164;
+    --accent: 92 170 214; --accent-deep: 140 200 236; --on-accent: 10 22 36;
+    --previsto: 164 148 236; --gold: 226 170 74;
+    --menu: 9 14 22; --menu-2: 18 26 38; --on-menu: 236 242 247; --on-menu-mute: 138 154 174;
+    --shadow-note: 0 1px 0 rgba(0,0,0,.4), 0 16px 40px -20px rgba(0,0,0,.8);
     --cat-moradia: #6fa8c7; --cat-alimentacao: #e09a55; --cat-mercado: #6fbf7f;
     --cat-transporte: #cdb25a; --cat-saude: #c883b9; --cat-assinaturas: #6fbeb9;
     --cat-lazer: #a597e8; --cat-educacao: #de7d74; --cat-outros: #9aa9a3;
@@ -47,15 +49,16 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
       color-scheme: dark;
-      --paper: 14 26 24; --paper-2: 19 34 31;
-      --sheet: 21 36 31; --sheet-2: 27 45 40;
-      --ink: 228 235 227; --ink-2: 179 194 188; --ink-mute: 138 156 150;
-      --rule: 36 55 47; --rule-strong: 52 73 63;
-      --credit: 79 191 140; --credit-deep: 125 214 173;
-      --debit: 224 112 138; --debit-deep: 238 154 174;
-      --accent: 165 151 232; --accent-deep: 195 184 242; --on-accent: 20 16 42;
-      --gold: 214 178 94;
-      --shadow-note: 0 1px 0 rgba(0,0,0,.4), 0 24px 48px -28px rgba(0,0,0,.8);
+      --paper: 14 20 30; --paper-2: 21 29 42;
+      --sheet: 23 32 46; --sheet-2: 30 41 58;
+      --ink: 230 236 243; --ink-2: 178 190 206; --ink-mute: 132 146 165;
+      --rule: 40 52 70; --rule-strong: 58 73 94;
+      --credit: 62 196 138; --credit-deep: 118 222 174;
+      --debit: 236 98 118; --debit-deep: 245 150 164;
+      --accent: 92 170 214; --accent-deep: 140 200 236; --on-accent: 10 22 36;
+      --previsto: 164 148 236; --gold: 226 170 74;
+      --menu: 9 14 22; --menu-2: 18 26 38; --on-menu: 236 242 247; --on-menu-mute: 138 154 174;
+      --shadow-note: 0 1px 0 rgba(0,0,0,.4), 0 16px 40px -20px rgba(0,0,0,.8);
       --cat-moradia: #6fa8c7; --cat-alimentacao: #e09a55; --cat-mercado: #6fbf7f;
       --cat-transporte: #cdb25a; --cat-saude: #c883b9; --cat-assinaturas: #6fbeb9;
       --cat-lazer: #a597e8; --cat-educacao: #de7d74; --cat-outros: #9aa9a3;
@@ -92,10 +95,6 @@
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 
-/* Assinatura: as linhas do guilhochê se "gravam" ao abrir e ao trocar de mês. */
-@keyframes gravar { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-.gravar { stroke-dasharray: 1; stroke-dashoffset: 1; animation: gravar 1.6s cubic-bezier(.45,.05,.25,1) forwards; }
-@media (prefers-reduced-motion: reduce) { .gravar { stroke-dashoffset: 0; animation: none; } }
-@keyframes encher-anel { from { stroke-dasharray: 0 1; } }
-.anel-poupanca { animation: encher-anel 1.2s .5s cubic-bezier(.45,.05,.25,1) both; }
-@media (prefers-reduced-motion: reduce) { .anel-poupanca { animation: none; } }
+/* Faixa de resultado: tinta profunda com a cor do resultado (verde sobrou / carmim faltou). */
+.faixa-sobrou { background: linear-gradient(112deg, rgb(var(--menu)) 0%, #0f5c5a 55%, rgb(var(--credit)) 130%); }
+.faixa-faltou { background: linear-gradient(112deg, rgb(var(--menu)) 0%, #5a2038 55%, rgb(var(--debit)) 130%); }
