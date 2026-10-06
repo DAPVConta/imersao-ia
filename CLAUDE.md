@@ -99,7 +99,9 @@ vercel.json                build, cache e rotas da Vercel
 ```
 
 Módulos que existem hoje: `acesso` (login, nova senha, membros; schema
-`acesso` no banco), `financas` (dados, banco, regras), `painel`
+`acesso` no banco), `dicas` (botão "Dicas da IA": chama a Edge Function
+`dicas-financeiras`, que lê os dados como o usuário e pergunta ao Claude;
+chave no segredo `claude_api` do Supabase; sem tabela própria), `financas` (dados, banco, regras), `painel`
 (gráficos e tabelas), `importacao` (manual, PDF, CSV, regras), `agenda`
 (pagamentos e recebimentos previstos; schema `agenda` no banco).
 
@@ -281,7 +283,11 @@ um lançamento e editar regras de categorização afetam só o navegador.
   **privado** por migração, com políticas em `storage.objects` por
   `bucket_id` e dono; no front, `supabase.storage.from('<bucket>')`. Hoje o
   PDF é lido só no navegador e não é enviado.
-- **Edge Functions**: em `supabase/functions/` (ver o README de lá). Usar para
+- **Edge Functions**: em `supabase/functions/` (ver o README de lá). Hoje:
+  `dicas-financeiras` (IA). Publicar pelo MCP `deploy_edge_function` com
+  `verify_jwt: true`, mandando também os arquivos de `_shared/`. Chamadas ao
+  Claude seguem a skill `claude-api` (SDK oficial com versão fixa, modelo
+  `claude-opus-5-5`, `fallbacks: "default"`). Usar para
   chave secreta, API de terceiros ou processamento pesado. Chamar com
   `supabase.functions.invoke('<nome>')`.
 

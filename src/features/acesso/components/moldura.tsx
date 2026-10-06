@@ -1,39 +1,34 @@
 import type { ReactNode } from 'react'
-import { Logo, LogoCompleto } from '@/components/layout/logo'
+import { LogoCompleto } from '@/components/layout/logo'
 import { VERSAO_APP } from '@/lib/versao'
 import { Selo } from './selo'
 
 /**
- * Página de acesso (entrar, nova senha, sem acesso). Repete a casca do app:
- * painel azul-petróleo à esquerda, como o menu, e o formulário num cartão
- * branco sobre o fundo (docs/design.md). No celular o painel vira uma faixa.
+ * Página de acesso (entrar, nova senha, sem acesso). Painel azul-petróleo à
+ * esquerda, como o menu do app, e o formulário num cartão branco. A marca
+ * aparece UMA vez: o logotipo completo, grande e centralizado no cartão.
+ * No celular o painel some e fica só o cartão.
  */
 export function Moldura({ titulo, dica, children }: { titulo: string; dica: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-paper lg:flex-row">
-      <aside className="relative flex shrink-0 flex-col overflow-hidden bg-menu px-5 py-4 text-menu-foreground lg:w-[420px] lg:px-10 lg:py-10">
-        <Selo className="pointer-events-none absolute -bottom-28 -right-28 hidden size-[440px] opacity-[.13] lg:block" />
-        <div className="relative flex items-center gap-3">
-          <Logo className="size-9 flex-none" />
-          <div className="leading-tight">
-            <div className="text-[15px] font-semibold">Assistente Financeiro</div>
-            <div className="text-[12px] text-menu-mute">Finanças da casa</div>
-          </div>
-        </div>
-        <p className="relative mt-auto hidden max-w-[32ch] text-[15px] leading-relaxed text-menu-foreground/90 lg:block">
+    <div className="flex min-h-dvh bg-paper">
+      <aside className="relative hidden w-[420px] shrink-0 flex-col justify-end overflow-hidden bg-menu px-10 py-10 text-menu-foreground lg:flex">
+        <Selo className="pointer-events-none absolute -right-24 top-1/2 size-[520px] -translate-y-1/2 opacity-[.13]" />
+        <p className="relative max-w-[30ch] text-[17px] leading-relaxed text-menu-foreground/90">
           Como o mês fechou e o que ainda vem pela frente, num lugar só.
         </p>
-        <p className="relative mt-3 hidden text-[11.5px] text-menu-mute lg:block">{VERSAO_APP}</p>
+        <p className="relative mt-3 text-[11.5px] text-menu-mute">{VERSAO_APP}</p>
       </aside>
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
-        <section aria-labelledby="titulo-acesso" className="w-full max-w-[420px] rounded-lg border border-rule bg-sheet p-6 shadow-nota sm:p-8">
-          {/* -ml-2: a placa tem respiro interno; assim o desenho alinha com o título. */}
-          <LogoCompleto className="-ml-2 mb-5 h-[84px]" />
-          <h1 id="titulo-acesso" className="text-[24px] font-semibold leading-tight tracking-[-.015em] text-ink">
+        <section aria-labelledby="titulo-acesso" className="w-full max-w-[440px] rounded-lg border border-rule bg-sheet px-6 pb-8 pt-7 shadow-nota sm:px-10 sm:pb-10 sm:pt-9">
+          <div className="mb-7 flex justify-center">
+            <LogoCompleto className="h-[136px] sm:h-[152px]" />
+          </div>
+          <h1 id="titulo-acesso" className="text-center text-[22px] font-semibold leading-tight tracking-[-.015em] text-ink sm:text-[24px]">
             {titulo}
           </h1>
-          <p className="mb-6 mt-1.5 text-[14px] text-ink-2">{dica}</p>
+          <p className="mx-auto mb-7 mt-2 max-w-[36ch] text-center text-[14px] text-ink-2">{dica}</p>
           {children}
         </section>
         <p className="mt-6 text-[11.5px] text-ink-mute lg:hidden">{VERSAO_APP}</p>

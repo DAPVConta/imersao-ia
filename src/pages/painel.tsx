@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { CabecalhoPagina } from '@/components/layout/cabecalho-pagina'
 import { resumirAgenda } from '@/features/agenda/resumo'
+import { BotaoDicas } from '@/features/dicas/components/botao-dicas'
 import { serieMensal, totaisDoMes } from '@/features/financas/calculos'
 import { useFinancas } from '@/features/financas/store'
 import { ContaECartao } from '@/features/painel/components/conta-e-cartao'
@@ -33,7 +34,7 @@ export function PaginaPainel() {
   const n = mes.transactions.length
   return (
     <>
-      <CabecalhoPagina titulo="Painel" contexto={`${n === 1 ? '1 lançamento' : `${n} lançamentos`} em ${mesPorExtenso(mesAtual)}`} />
+      <CabecalhoPagina titulo="Painel" contexto={`${n === 1 ? '1 lançamento' : `${n} lançamentos`} em ${mesPorExtenso(mesAtual)}`} acao={<BotaoDicas />} />
       <div className="grid gap-5">
         <ResultadoDoMes chave={mesAtual} totais={totais} serie={serie} saldoPrevisto={agenda.saldoPrevisto} />
         <Indicadores chave={mesAtual} totais={totais} serie={serie} aPagar30={agenda.aPagar30} atrasados={agenda.atrasados} />

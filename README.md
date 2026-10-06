@@ -24,6 +24,15 @@ agenda do que ainda vai acontecer.
 - Troque de mês na barra do topo (setas, lista ou teclas ← →) ou clicando no
   mês no gráfico do ano; vale para todas as páginas. Abre no mês mais recente.
 
+**Dicas da IA**
+- Botão *Dicas da IA* no alto do Painel: a inteligência artificial (Claude,
+  da Anthropic) lê os números salvos no banco (meses, categorias, maiores
+  despesas e agenda) e devolve um resumo, um alerta quando algo pede atenção
+  e de 3 a 6 dicas práticas, com a economia estimada por mês.
+- Roda no servidor do Supabase (Edge Function `dicas-financeiras`); a chave da
+  IA fica no segredo `claude_api` do Supabase e nunca vai para o navegador.
+  Cada clique em *Gerar de novo* é uma nova consulta (paga) à IA.
+
 **Painel do mês**
 - **Resultado do mês:** quanto sobrou (ou faltou), o que entrou e saiu, a
   comparação com o mês anterior, quanto do que entrou foi gasto e a previsão
@@ -119,7 +128,7 @@ Supabase, crie um `.env.local` com `VITE_SUPABASE_URL` e
 ```
 src/
   pages/             páginas (uma por endereço)
-  features/          um módulo por assunto: acesso (login), financas, painel, importacao, agenda
+  features/          um módulo por assunto: acesso (login), dicas (IA), financas, painel, importacao, agenda
   components/ui/     componentes base (botão, cartão, seletor, abas, diálogo...)
   components/layout/ cabeçalho, rodapé, avisos
   lib/               conexão com o Supabase, datas, formatação
@@ -148,6 +157,9 @@ valem só para o navegador em uso (não vão para o banco).
 
 ## Histórico
 
+- **06/10/2026 — `v06/10/2026-c`**: botão *Dicas da IA* no Painel (Claude lê os
+  dados do banco e sugere como melhorar as finanças). Tela de entrada com um
+  logotipo só, maior e centralizado.
 - **06/10/2026 — `v06/10/2026-b`**: logotipo e favicon novos (símbolo de
   barras subindo com moeda). Logotipo completo na tela de entrada; símbolo no
   menu, na barra do celular, na aba do navegador e no atalho do celular.

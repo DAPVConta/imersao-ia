@@ -83,9 +83,11 @@ export function TelaDeEntrada() {
         </Button>
       </form>
 
-      <Button variant="link" className="mt-5 px-0" onClick={() => trocarModo(entrando ? 'esqueci' : 'entrar')}>
-        {entrando ? 'Esqueci minha senha' : 'Voltar para entrar'}
-      </Button>
+      <div className="mt-5 text-center">
+        <Button variant="link" className="px-0" onClick={() => trocarModo(entrando ? 'esqueci' : 'entrar')}>
+          {entrando ? 'Esqueci minha senha' : 'Voltar para entrar'}
+        </Button>
+      </div>
     </Moldura>
   )
 }

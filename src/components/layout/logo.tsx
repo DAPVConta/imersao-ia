@@ -19,7 +19,7 @@ export function Logo({ className }: { className?: string }) {
 export function LogoCompleto({ className }: { className?: string }) {
   return (
     <span className={cn('inline-flex rounded-md bg-placa p-2', className)}>
-      <img src={logoCompleto} alt="Financeiro, sistema financeiro" width={163} height={120} className="h-full w-auto" />
+      <img src={logoCompleto} alt="Financeiro, sistema financeiro" width={327} height={240} className="h-full w-auto" />
     </span>
   )
 }

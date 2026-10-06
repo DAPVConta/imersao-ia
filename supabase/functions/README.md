@@ -4,8 +4,13 @@ Código que roda no servidor do Supabase (Deno), para o que **não pode** rodar
 no navegador: usar chave secreta, chamar API de terceiros com credencial,
 processar arquivo pesado, tarefas agendadas.
 
-Ainda não há nenhuma função publicada — o painel atual não precisa. Esta pasta
-já traz o que toda função vai usar:
+Funções publicadas:
+
+- `dicas-financeiras` — botão "Dicas da IA" do Painel. Confere se quem chamou é
+  membro da casa, lê os números como esse usuário (RLS vale) e pede dicas ao
+  Claude (SDK `@anthropic-ai/sdk`, versão fixa). Usa o segredo `claude_api`.
+
+Esta pasta também traz o que toda função usa:
 
 - `_shared/cors.ts` — cabeçalhos para o navegador poder chamar a função;
 - `_shared/supabase.ts` — cliente "como o usuário" (respeita RLS) e cliente
